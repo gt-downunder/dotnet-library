@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Authors>gt-downunder</Authors>
+    <Company></Company>
+    <Description>
+      Contains C# extensions, additional exception types, Azure services, and random utilities.
+    </Description>
+    <RepositoryUrl>https://github.com/gt-downunder/dotnet-library</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <ApplicationIcon>favicon.ico</ApplicationIcon>
+    <Title>DotNet.Library</Title>
+    <RootNamespace>DotNet.Library</RootNamespace>
+    <PackageId>DotNet.Library</PackageId>
+    <AssemblyName>DotNet.Library</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Exceptions\Exceptions.csproj" />
+    <ProjectReference Include="..\Extensions\Extensions.csproj" />
+    <ProjectReference Include="..\Services\Services.csproj" />
+    <ProjectReference Include="..\Utilities\Utilities.csproj" />
+  </ItemGroup>
+
+</Project>

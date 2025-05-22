@@ -1,0 +1,75 @@
+name: Build Project and Publish NuGet Package
+
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - main
+
+env:
+  DOTNET_SDK_VERSION: 9.0.x
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.set_version.outputs.VERSION }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Generate dynamic version number
+      id: set_version
+      run: |
+          echo "VERSION=1.0.${{ github.run_number }}" >> $GITHUB_ENV
+          echo "VERSION=1.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore ./_package/DotNet.Library.csproj
+
+    - name: Build projects
+      run: dotnet build ./_package/DotNet.Library.csproj --no-restore -c Release -o ./publish/
+
+    # - name: Run tests
+    #   run: dotnet test
+
+    - name: Upload compiled binaries as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-output-${{ env.VERSION }}
+        path: ./publish/
+
+
+  publish:
+    needs: build
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup NuGet CLI
+      uses: nuget/setup-nuget@v2
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-output-${{ needs.build.outputs.VERSION }}
+        path: ./publish/
+
+    - name: Update version in .nuspec file
+      run: sed -i "s/<version>.*<\/version>/<version>${{ needs.build.outputs.VERSION }}<\/version>/" package.nuspec 
+
+    - name: Pack the project
+      run: nuget pack package.nuspec
+
+    - name: Push to NuGet
+      run: nuget push GT.DotNet.Library.${{ needs.build.outputs.VERSION }}.nupkg ${{ secrets.nuget_api_key }} -src https://api.nuget.org/v3/index.json

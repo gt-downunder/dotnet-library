@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>gt-downunder</Authors>
+		<Company></Company>
+		<Description>This package contains utility classes such as RandomFactory.</Description>
+		<RepositoryUrl>https://github.com/gt-downunder/dotnet-library</RepositoryUrl>
+		<RepositoryType>Git</RepositoryType>
+		<ApplicationIcon>favicon.ico</ApplicationIcon>
+		<Version>1.0.1</Version>
+		<RootNamespace>DotNet.Library.Utilities</RootNamespace>
+		<PackageId>DotNet.Library.Utilities</PackageId>
+		<Title>DotNet.Library.Utilities</Title>
+		<AssemblyName>DotNet.Library.Utilities</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="RandomNameGeneratorLibrary" Version="1.2.2" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.10.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Exceptions\Exceptions.csproj" />
+		<ProjectReference Include="..\Extensions\Extensions.csproj" />
+	</ItemGroup>
+
+</Project>

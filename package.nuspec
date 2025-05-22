@@ -1,0 +1,19 @@
+<package>
+  <metadata>
+    <id>GT.DotNet.Library</id>
+    <version>1.0.0</version>
+    <authors>gt-downunder</authors>
+    <owners>gt-downunder</owners>
+    <description>C# 9.0 extensions, services, utilities, and additional exception types</description>
+    <license type="expression">GPL-3.0-or-later</license>
+    <tags>csharp dotnet extensions services utilities</tags>
+    <projectUrl>https://github.com/gt-downunder/dotnet-library</projectUrl>
+    <repository type="git" url="https://github.com/gt-downunder/dotnet-library.git" />
+    <readme>README.md</readme>
+  </metadata>
+
+  <files>
+    <file src="README.md" target="README.md" />
+    <file src="LICENSE.md" target="LICENSE.md" />
+  </files>
+</package>
