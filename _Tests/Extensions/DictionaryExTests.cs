@@ -1,10 +1,9 @@
-using DotNet.Library.Extensions;
-using DotNet.Library.Utilities;
-using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DotNet.Library.Extensions;
+using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DotNet.Library.Tests.Extensions
 {
@@ -12,7 +11,7 @@ namespace DotNet.Library.Tests.Extensions
     public class DictionaryExTests : BaseExtensionTest
     {
         [TestMethod]
-        public void HasAnyKey_ShouldReturnTrue_WhenKeyIsInDicitonary()
+        public void HasAnyKey_ShouldReturnTrue_WhenKeyIsInDictionary()
         {
             var tinyDictionary = new Dictionary<string, object>() { { "one", 1 } };
 
@@ -20,10 +19,10 @@ namespace DotNet.Library.Tests.Extensions
             tinyDictionary.HasAnyKey(["one", "two"]).Should().BeTrue();
 
             const int size = 10000;
-            var hugeDictionary = GetRandomStringObjectDictionary(size);
+            Dictionary<string, object> hugeDictionary = GetRandomStringObjectDictionary(size);
 
             var searchArray = new string[10];
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 searchArray[i] = hugeDictionary.ElementAt(RandomFactory.GetInteger(0, size)).Key;
             }
@@ -43,7 +42,7 @@ namespace DotNet.Library.Tests.Extensions
         [TestMethod]
         public void HasAnyKey_ShouldReturnFalse_WhenOneKeyIsNull()
         {
-            var dict = GetRandomStringObjectDictionary(10);
+            Dictionary<string, object> dict = GetRandomStringObjectDictionary(10);
 
             var result = dict.HasAnyKey([null]);
 
@@ -53,7 +52,7 @@ namespace DotNet.Library.Tests.Extensions
         [TestMethod]
         public void HasAnyKey_ShouldReturnFalse_WhenKeyListIsNull()
         {
-            var dict = GetRandomStringObjectDictionary(10);
+            Dictionary<string, object> dict = GetRandomStringObjectDictionary(10);
 
             var result = dict.HasAnyKey(null);
 
@@ -61,32 +60,33 @@ namespace DotNet.Library.Tests.Extensions
         }
 
         [TestMethod]
-        public void TryGetValue_ShouldReturnValue_WhenKeyIsInDicitonary()
+        public void TryGetValue_ShouldReturnValue_WhenKeyIsInDictionary()
         {
             var tinyDictionary = new Dictionary<string, object>() { { "one", 1 } };
 
-            tinyDictionary.TryGetValue("one").Should().NotBeNull();
-            tinyDictionary.TryGetValue("one").Should().Be(1);
+            tinyDictionary.TryGetValue("one", out var tinyValue).Should().BeTrue();
+            tinyValue.Should().Be(1);
 
             const int size = 10000;
-            var hugeDictionary = GetRandomStringObjectDictionary(size);
+            Dictionary<string, object> hugeDictionary = GetRandomStringObjectDictionary(size);
 
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
-                int idx = RandomFactory.GetInteger(0, size);
+                var idx = RandomFactory.GetInteger(0, size);
                 var key = hugeDictionary.ElementAt(idx).Key;
                 var value = hugeDictionary.ElementAt(idx).Value;
 
-                hugeDictionary.TryGetValue(key).Should().Be(value);
+                hugeDictionary.TryGetValue(key, out var actual).Should().BeTrue();
+                actual.Should().Be(value);
             }
         }
 
         [TestMethod]
         public void TryGetValue_ShouldReturnDefaultValue_WhenKeyIsNull()
         {
-            var dict = GetRandomStringObjectDictionary(10);
+            Dictionary<string, object> dict = GetRandomStringObjectDictionary(10);
 
-            var result = dict.TryGetValue(null);
+            dict.TryGetValue(null!, out var result);
 
             result.Should().BeNull();
         }
@@ -95,7 +95,7 @@ namespace DotNet.Library.Tests.Extensions
         {
             var dict = new Dictionary<string, object>();
 
-            for (int i = 0; dict.Count < size; i++)
+            for (var i = 0; dict.Count < size; i++)
             {
                 try
                 {

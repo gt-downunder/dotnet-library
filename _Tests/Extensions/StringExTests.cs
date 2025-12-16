@@ -1,7 +1,7 @@
-﻿using DotNet.Library.Extensions;
+﻿using System.Linq;
+using DotNet.Library.Extensions;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Linq;
 
 namespace DotNet.Library.Tests.Extensions
 {
@@ -11,13 +11,16 @@ namespace DotNet.Library.Tests.Extensions
         [TestMethod]
         public void IsWellFormedEmail_ShouldReturnTrue_WhenEmailsAreCorrect()
         {
-            string[] goodEmails = [ "david.jones@contoso.com", "d.j@server1.contoso.com",
-                                    "jones@ms1.contoso.com", "j@contoso.com9",
-                                    "js#internal@contoso.com", "j_9@[129.126.118.1]",
-                                    "js@contoso.com9", "j.s@server1.contoso.com",
-                                    "\"j\\\"s\\\"\"@contoso.com", "js@contoso.中国" ];
+            string[] goodEmails =
+            [
+                "david.jones@contoso.com", "d.j@server1.contoso.com",
+                "jones@ms1.contoso.com", "j@contoso.com9",
+                "js#internal@contoso.com", "j_9@[129.126.118.1]",
+                "js@contoso.com9", "j.s@server1.contoso.com",
+                "\"j\\\"s\\\"\"@contoso.com", "js@contoso.中国"
+            ];
 
-            foreach (string emailAddress in goodEmails)
+            foreach (var emailAddress in goodEmails)
             {
                 emailAddress.IsWellFormedEmailAddress().Should().BeTrue();
             }
@@ -26,10 +29,13 @@ namespace DotNet.Library.Tests.Extensions
         [TestMethod]
         public void IsWellFormedEmail_ShouldReturnFalse_WhenEmailsAreIncorrect()
         {
-            string[] badEmails = [ "j.@@.contoso.com", "j@..s@contoso.com",
-                                   "js*@contoso.com.@", "js@contoso.@.com" ];
+            string[] badEmails =
+            [
+                "j.@@.contoso.com", "j@..s@contoso.com",
+                "js*@contoso.com.@", "js@contoso.@.com"
+            ];
 
-            foreach (string emailAddress in badEmails)
+            foreach (var emailAddress in badEmails)
             {
                 emailAddress.IsWellFormedEmailAddress().Should().BeFalse();
             }
@@ -75,40 +81,18 @@ namespace DotNet.Library.Tests.Extensions
         public void Split_SeparatorNotInString_NotSplit()
         {
             const string input = "This is a regular old sentence, nothing special to see here.";
-            string[] result = input.Split("fox");
+            var result = input.Split("fox");
 
             result.Length.Should().Be(1);
             result.Single().Should().Be(input);
         }
 
         [TestMethod]
-        public void SplitIgnoreCase_SeparatorCaseDoesntMatch_CaseInsensitiveSplit()
-        {
-            const string input = "HELLO WORLD! WE ARE SO EXCITED";
-            string[] result = input.SplitIgnoreCase("world");
-
-            result.Length.Should().Be(2);
-            result[0].Should().Be("HELLO ");
-            result[^1].Should().Be("! WE ARE SO EXCITED");
-        }
-
-        [TestMethod]
-        public void SplitIgnoreCase_SeparatorCaseMatches_CaseInsensitiveSplit()
-        {
-            const string input = "HELLO WORLD! WE ARE SO EXCITED";
-            string[] result = input.SplitIgnoreCase("WORLD");
-
-            result.Length.Should().Be(2);
-            result[0].Should().Be("HELLO ");
-            result[^1].Should().Be("! WE ARE SO EXCITED");
-        }
-
-        [TestMethod]
         public void Split_IgnoreCaseFalseOrNotPassed_NotSplit()
         {
             const string input = "HELLO WORLD! WE ARE SO EXCITED";
-            string[] falseResult = input.Split("world", ignoreCase: false);
-            string[] nullResult = input.Split("world");
+            var falseResult = input.Split("world", ignoreCase: false);
+            var nullResult = input.Split("world");
 
             falseResult.Length.Should().Be(1);
             falseResult.Single().Should().Be(input);
@@ -121,7 +105,7 @@ namespace DotNet.Library.Tests.Extensions
         public void Split_IgnoreCaseTrue_CaseInsensitiveSplit()
         {
             const string input = "HELLO WORLD! WE ARE SO EXCITED";
-            string[] result = input.Split("world", ignoreCase: true);
+            var result = input.Split("world", ignoreCase: true);
 
             result.Length.Should().Be(2);
             result[0].Should().Be("HELLO ");

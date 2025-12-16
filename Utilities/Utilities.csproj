@@ -22,9 +22,4 @@
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.10.0" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\Exceptions\Exceptions.csproj" />
-		<ProjectReference Include="..\Extensions\Extensions.csproj" />
-	</ItemGroup>
-
 </Project>

@@ -1,16 +1,18 @@
-﻿using DotNet.Library.Extensions;
-using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using DotNet.Library.Extensions;
+using FluentAssertions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DotNet.Library.Tests.Extensions
 {
     [TestClass]
     public class HttpExtensionTests
     {
-        private static JsonSerializerOptions GetOptions() => new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        private static JsonSerializerOptions GetOptions() =>
+            new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
         [TestMethod]
         public async Task EnsureObject_CaseInsensitiveFalse_NullProperites()
@@ -24,14 +26,14 @@ namespace DotNet.Library.Tests.Extensions
                         Name = "Hello World",
                         Id = 1
                     }, GetOptions())),
-                StatusCode = System.Net.HttpStatusCode.OK
+                StatusCode = HttpStatusCode.OK
             };
 
             // Act
             var result = await response.EnsureObject<TestDto>(false);
 
             // Assert
-            result.Id.Should().Be(default);
+            result.Id.Should().Be(0);
             result.Name.Should().Be(null);
         }
 
@@ -46,7 +48,8 @@ namespace DotNet.Library.Tests.Extensions
                 Name = "Hello World",
                 Id = 1
             };
-            var response = new HttpResponseMessage { Content = new StringContent(JsonSerializer.Serialize(dto)), StatusCode = System.Net.HttpStatusCode.OK };
+            var response = new HttpResponseMessage
+                { Content = new StringContent(JsonSerializer.Serialize(dto)), StatusCode = HttpStatusCode.OK };
 
             // Act
             var result = await response.EnsureObject<TestDto>(propertyNameCaseInsensitive);
@@ -57,15 +60,15 @@ namespace DotNet.Library.Tests.Extensions
         }
 
         [TestMethod]
-        [DataRow(System.Net.HttpStatusCode.BadRequest)]
-        [DataRow(System.Net.HttpStatusCode.Unauthorized)]
-        [DataRow(System.Net.HttpStatusCode.Forbidden)]
-        [DataRow(System.Net.HttpStatusCode.InternalServerError)]
-        [DataRow(System.Net.HttpStatusCode.NotFound)]
-        [DataRow(System.Net.HttpStatusCode.BadGateway)]
-        [DataRow(System.Net.HttpStatusCode.Conflict)]
-        [DataRow(System.Net.HttpStatusCode.Continue)]
-        public async Task EnsureObject_NonSuccessStatusCode_ThrowsHttpRequestException(System.Net.HttpStatusCode statusCode)
+        [DataRow(HttpStatusCode.BadRequest)]
+        [DataRow(HttpStatusCode.Unauthorized)]
+        [DataRow(HttpStatusCode.Forbidden)]
+        [DataRow(HttpStatusCode.InternalServerError)]
+        [DataRow(HttpStatusCode.NotFound)]
+        [DataRow(HttpStatusCode.BadGateway)]
+        [DataRow(HttpStatusCode.Conflict)]
+        [DataRow(HttpStatusCode.Continue)]
+        public async Task EnsureObject_NonSuccessStatusCode_ThrowsHttpRequestException(HttpStatusCode statusCode)
         {
             // Arrange
             var response = new HttpResponseMessage { Content = new StringContent(""), StatusCode = statusCode };
@@ -80,7 +83,7 @@ namespace DotNet.Library.Tests.Extensions
         public async Task EnsureObject_EmptyResponseContent_ThrowsHttpRequestException()
         {
             // Arrange
-            var response = new HttpResponseMessage { Content = new StringContent(""), StatusCode = System.Net.HttpStatusCode.OK };
+            var response = new HttpResponseMessage { Content = new StringContent(""), StatusCode = HttpStatusCode.OK };
 
             // Act
 
@@ -90,8 +93,8 @@ namespace DotNet.Library.Tests.Extensions
 
         private class TestDto
         {
-            public string Name { get; set; }
-            public int Id { get; set; }
+            public string Name { get; init; }
+            public int Id { get; init; }
         }
     }
 }
