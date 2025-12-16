@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.3.11310.294 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNet.Library.Tests", "_Tests\DotNet.Library.Tests.csproj", "{64517ECF-CC44-483D-A31D-A785DAC3165D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNet.Library.Tests", "tests\DotNet.Library.Tests.csproj", "{64517ECF-CC44-483D-A31D-A785DAC3165D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNet.Library", "_package\DotNet.Library.csproj", "{2321A167-EB4F-4626-91E8-7EA15BCB1DBA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNet.Library", "src\DotNet.Library.csproj", "{2321A167-EB4F-4626-91E8-7EA15BCB1DBA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
