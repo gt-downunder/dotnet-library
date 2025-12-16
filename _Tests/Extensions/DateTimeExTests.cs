@@ -11,9 +11,7 @@ namespace DotNet.Library.Tests.Extensions
         [TestMethod]
         public void ToFormattedDate_NullDateTime_ReturnsEmptyString()
         {
-            DateTime? testDate = null;
-
-            var result = testDate.ToFormattedDate();
+            var result = ((DateTime?)null).ToFormattedDate();
 
             result.Should().Be(string.Empty);
         }
@@ -31,9 +29,7 @@ namespace DotNet.Library.Tests.Extensions
         [TestMethod]
         public void ToFormattedDateTime_NullDateTime_ReturnsEmptyString()
         {
-            DateTime? testDate = null;
-
-            var result = testDate.ToFormattedDateTime();
+            var result = ((DateTime?)null).ToFormattedDateTime();
 
             result.Should().Be(string.Empty);
         }
@@ -56,7 +52,7 @@ namespace DotNet.Library.Tests.Extensions
         [DataRow("yyyy-MM-dd")]
         public void FromFormattedDate_InvalidFormat_ReturnsNull(string testDate)
         {
-            var result = testDate.FromFormattedDate();
+            DateTime? result = testDate.FromFormattedDate();
 
             result.Should().BeNull();
         }
@@ -66,7 +62,7 @@ namespace DotNet.Library.Tests.Extensions
         {
             const string testDate = "2023-03-23";
 
-            var result = testDate.FromFormattedDate();
+            DateTime? result = testDate.FromFormattedDate();
 
             result.Should().Be(new DateTime(2023, 3, 23));
         }
@@ -79,7 +75,7 @@ namespace DotNet.Library.Tests.Extensions
         [DataRow("yyyy-MM-ddTHH:mm:ss")]
         public void FromFormattedDateTime_InvalidFormat_ReturnsNull(string testDate)
         {
-            var result = testDate.FromFormattedDateTime();
+            DateTime? result = testDate.FromFormattedDateTime();
 
             result.Should().BeNull();
         }
@@ -89,12 +85,12 @@ namespace DotNet.Library.Tests.Extensions
         {
             const string testDate = "2023-03-23T11:57:28";
 
-            var result = testDate.FromFormattedDateTime();
+            DateTime? result = testDate.FromFormattedDateTime();
 
             result.Should().Be(new DateTime(2023, 3, 23, 11, 57, 28));
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(0)]
         [DataRow(1)]
         [DataRow(10)]
@@ -118,7 +114,7 @@ namespace DotNet.Library.Tests.Extensions
             result.Millisecond.Should().Be(0);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("2019-09-30")] // Monday
         [DataRow("2019-10-01")] // Tuesday
         [DataRow("2019-10-02")] // Wednesday
@@ -130,7 +126,7 @@ namespace DotNet.Library.Tests.Extensions
             dt.IsWeekday().Should().BeTrue();
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("2019-10-05")] // Saturday
         [DataRow("2019-10-06")] // Sunday
         public void IsWeekday_SaturdayAndSunday_ReturnsFalse(string dateTime)
@@ -139,7 +135,7 @@ namespace DotNet.Library.Tests.Extensions
             dt.IsWeekday().Should().BeFalse();
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("2019-10-05")] // Saturday
         [DataRow("2019-10-06")] // Sunday
         public void IsWeekend_SaturdayAndSunday_ReturnsTrue(string dateTime)
@@ -148,7 +144,7 @@ namespace DotNet.Library.Tests.Extensions
             dt.IsWeekend().Should().BeTrue();
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow("2019-09-30")] // Monday
         [DataRow("2019-10-01")] // Tuesday
         [DataRow("2019-10-02")] // Wednesday
