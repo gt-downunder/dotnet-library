@@ -226,6 +226,19 @@ Benchmark classes live in the `benchmarks/` directory and use [BenchmarkDotNet](
    - Any new public API surfaces documented in the PR description
    - Confirmation that all tests pass
 
+### Merge Requirements
+
+All pull requests targeting `main` must pass the following checks before merging:
+
+| Requirement | Description |
+|---|---|
+| **Build & tests** | The CI build must succeed with zero warnings, zero errors, and all tests passing |
+| **Code scanning** | CodeQL must report no new security vulnerabilities |
+| **Code quality** | CodeQL must report no new code quality issues |
+| **Code owner approval** | A project maintainer must approve the PR |
+
+Direct pushes to `main` are not allowed — all changes must go through a pull request.
+
 ## What Makes a Good Contribution
 
 - **Fills a genuine gap** in the library's utility surface
