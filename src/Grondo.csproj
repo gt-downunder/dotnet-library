@@ -35,7 +35,7 @@
 
     <!-- Source Link: enables F12-into-source for NuGet consumers -->
     <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.*" PrivateAssets="All"/>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.*" PrivateAssets="All"/>
     </ItemGroup>
 
     <!-- Include README and LICENSE in the NuGet package -->
