@@ -22,7 +22,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Generate dynamic version number
       id: set_version
@@ -32,7 +32,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
 
@@ -65,7 +65,7 @@ jobs:
       run: dotnet pack src/Grondo.csproj --no-build -c Release -p:PackageVersion=${{ env.VERSION }} -o ./nupkgs/
 
     - name: Upload NuGet packages
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: nupkgs-${{ env.VERSION }}
         path: ./nupkgs/
@@ -76,13 +76,13 @@ jobs:
 
     steps:
     - name: Download NuGet packages
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v7
       with:
         name: nupkgs-${{ needs.build.outputs.VERSION }}
         path: ./nupkgs/
 
     - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
 
