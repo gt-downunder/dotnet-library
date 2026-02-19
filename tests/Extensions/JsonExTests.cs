@@ -12,8 +12,7 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ToJson_Object_ReturnsJsonString()
         {
-            var dto = new TestDto("Test", 42);
-            dto.ToJson().Should().Contain("\"Name\"").And.Contain("\"Value\"");
+            new TestDto("Test", 42).ToJson().Should().Contain("\"Name\"").And.Contain("\"Value\"");
         }
 
         [TestMethod]
@@ -78,8 +77,7 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void RoundTrip_SerializeAndDeserialize_PreservesData()
         {
-            var original = new TestDto("RoundTrip", 123);
-            original.ToJson().FromJson<TestDto>().Should().Be(original);
+            new TestDto("RoundTrip", 123).ToJson().FromJson<TestDto>().Should().Be(new TestDto("RoundTrip", 123));
         }
     }
 }

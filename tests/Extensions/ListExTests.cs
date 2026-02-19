@@ -219,12 +219,9 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ContainsIgnoreCase_DoesContainMatchingCase_ReturnsTrue()
         {
-            // Arrange
+            // Arrange & Assert
             const string TestValue = "Hello world";
-            var list = new List<string> { { TestValue } };
-
-            // Assert
-            list.ContainsIgnoreCase(TestValue).Should().BeTrue();
+            new List<string> { { TestValue } }.ContainsIgnoreCase(TestValue).Should().BeTrue();
         }
 
         [TestMethod]
@@ -233,11 +230,8 @@ namespace Grondo.Tests.Extensions
         [DataRow("HeLlO WoRlD")]
         public void ContainsIgnoreCase_DoesContainDifferentCase_ReturnsTrue(string testValue)
         {
-            // Arrange
-            var list = new List<string> { { "Hello world" } };
-
-            // Assert
-            list.ContainsIgnoreCase(testValue.ToLower()).Should().BeTrue();
+            // Arrange & Assert
+            new List<string> { { "Hello world" } }.ContainsIgnoreCase(testValue.ToLower()).Should().BeTrue();
         }
 
         [TestMethod]
@@ -246,11 +240,8 @@ namespace Grondo.Tests.Extensions
         [DataRow("HeLlO WoRlD ")]
         public void ContainsIgnoreCase_WhitespaceDifferenceOnly_ReturnsFalse(string testValue)
         {
-            // Arrange
-            var list = new List<string> { { "Hello world" } };
-
-            // Assert
-            list.ContainsIgnoreCase(testValue.ToLower()).Should().BeFalse();
+            // Arrange & Assert
+            new List<string> { { "Hello world" } }.ContainsIgnoreCase(testValue.ToLower()).Should().BeFalse();
         }
 
         [TestMethod]

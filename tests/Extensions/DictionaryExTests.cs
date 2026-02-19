@@ -35,17 +35,13 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void HasAnyKey_ShouldReturnFalse_WhenOneKeyIsNull()
         {
-            Dictionary<string, object> dict = GetRandomStringObjectDictionary(10);
-
-            dict.HasAnyKey([null!]).Should().BeFalse();
+            GetRandomStringObjectDictionary(10).HasAnyKey([null!]).Should().BeFalse();
         }
 
         [TestMethod]
         public void HasAnyKey_ShouldReturnFalse_WhenKeyListIsNull()
         {
-            Dictionary<string, object> dict = GetRandomStringObjectDictionary(10);
-
-            dict.HasAnyKey(null).Should().BeFalse();
+            GetRandomStringObjectDictionary(10).HasAnyKey(null).Should().BeFalse();
         }
 
         [TestMethod]
@@ -69,9 +65,7 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void TryGetValue_ShouldThrowArgumentNullException_WhenKeyIsNull()
         {
-            var dict = GetRandomStringObjectDictionary(10);
-
-            FluentActions.Invoking(() => dict.TryGetValue(null!, out _))
+            FluentActions.Invoking(() => GetRandomStringObjectDictionary(10).TryGetValue(null!, out _))
                 .Should().Throw<ArgumentNullException>();
         }
 
@@ -127,8 +121,7 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void GetOrAdd_KeyExists_ReturnsExisting()
         {
-            var dict = new Dictionary<string, int> { { "a", 42 } };
-            dict.GetOrAdd("a", () => 999).Should().Be(42);
+            new Dictionary<string, int> { { "a", 42 } }.GetOrAdd("a", () => 999).Should().Be(42);
         }
 
         [TestMethod]

@@ -59,9 +59,7 @@ namespace Grondo.Tests.Extensions
         public void ToNullableDateTime_WithFormat_ReturnsValue()
         {
             object value = "15/01/2024";
-            var result = value.ToNullableDateTime("dd/MM/yyyy");
-            result.Should().NotBeNull();
-            result!.Value.Day.Should().Be(15);
+            value.ToNullableDateTime("dd/MM/yyyy")!.Value.Day.Should().Be(15);
         }
 
         [TestMethod]
@@ -70,18 +68,13 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ToStringContent_StringObject_CreatesContent()
         {
-            var content = "hello".ToStringContent("text/plain");
-            content.Should().NotBeNull();
-            content.Headers.ContentType!.MediaType.Should().Be("text/plain");
+            "hello".ToStringContent("text/plain").Headers.ContentType!.MediaType.Should().Be("text/plain");
         }
 
         [TestMethod]
         public void ToStringContent_NonStringObject_SerializesToJson()
         {
-            var obj = new { Name = "test" };
-            var content = obj.ToStringContent("application/json");
-            content.Should().NotBeNull();
-            content.Headers.ContentType!.MediaType.Should().Be("application/json");
+            new { Name = "test" }.ToStringContent("application/json").Headers.ContentType!.MediaType.Should().Be("application/json");
         }
 
         // --- Pipe ---

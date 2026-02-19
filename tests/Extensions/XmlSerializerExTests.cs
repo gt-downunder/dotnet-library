@@ -16,8 +16,7 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void Serialize_ValidEntity_ReturnsXmlString()
         {
-            var entity = new TestEntity { Name = "Test", Value = 42 };
-            entity.Serialize().Should().Contain("<Name>Test</Name>")
+            new TestEntity { Name = "Test", Value = 42 }.Serialize().Should().Contain("<Name>Test</Name>")
                 .And.Contain("<Value>42</Value>");
         }
 
