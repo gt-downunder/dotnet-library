@@ -237,7 +237,9 @@ Benchmark classes live in the `benchmarks/` directory and use [BenchmarkDotNet](
 
 ## Documentation
 
-For a complete API reference with code examples for every public method, see [GUIDE.MD](GUIDE.MD). When adding new public APIs, ensure they are documented in the guide as well.
+> 📖 **[gt-downunder.github.io/grondo](https://gt-downunder.github.io/grondo/)** — Full API reference with practical code examples for every public method.
+
+When adding new public APIs, ensure they are documented in the `docs/` directory as well.
 
 ## Questions?
 
