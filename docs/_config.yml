@@ -1,0 +1,50 @@
+﻿title: Grondo
+description: A .NET 10 / C# 14 library of extension methods, utilities, and custom exception types.
+url: "https://gt-downunder.github.io"
+baseurl: "/grondo"
+
+remote_theme: just-the-docs/just-the-docs@v0.10.1
+
+color_scheme: dark
+
+permalink: pretty
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+
+aux_links:
+  "GitHub":
+    - "https://github.com/gt-downunder/grondo"
+  "NuGet":
+    - "https://www.nuget.org/packages/Grondo"
+
+aux_links_new_tab: true
+
+heading_anchors: true
+
+nav_sort: case_insensitive
+
+search:
+  heading_level: 3
+
+back_to_top: true
+back_to_top_text: "Back to top"
+
+footer_content: >-
+  Grondo is distributed under the <a href="https://github.com/gt-downunder/grondo/blob/main/LICENSE.md">GNU General Public License</a>.
+
+ga_tracking:
+ga_tracking_anonymize_ip: true
+
+callouts:
+  note:
+    title: Note
+    color: blue
+  warning:
+    title: Warning
+    color: red
+  tip:
+    title: Tip
+    color: green
+
