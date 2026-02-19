@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Grondo.Benchmarks</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <!-- Benchmarks use underscored names for readability; suppress analyzer noise -->
+    <NoWarn>CA1707;CA1822</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\Grondo.csproj" />
+  </ItemGroup>
+
+</Project>

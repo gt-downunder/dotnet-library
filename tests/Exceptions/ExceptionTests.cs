@@ -1,9 +1,9 @@
-﻿using DotNet.Library.Exceptions;
+﻿using System.Net;
 using FluentAssertions;
+using Grondo.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Net;
 
-namespace DotNet.Library.Tests.Exceptions
+namespace Grondo.Tests.Exceptions
 {
     [TestClass]
     public class ExceptionTests : BaseExceptionTest
@@ -11,137 +11,179 @@ namespace DotNet.Library.Tests.Exceptions
         [TestMethod]
         public void BadRequestException_Throws_400Error()
         {
-            try
-            {
-                ThrowException(new BadRequestException(string.Empty));
-            }
-            catch (BadRequestException ex)
-            {
-                ex.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-                ex.MessageHeader.Should().Be("Bad Request");
-                ((int)ex.StatusCode).Should().Be(400);
-            }
+            Action act = () => ThrowException(new BadRequestException(string.Empty));
+
+            act.Should().Throw<BadRequestException>()
+                .Which.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        }
+
+        [TestMethod]
+        public void BadRequestException_HasCorrectDefaultHeader()
+        {
+            var ex = new BadRequestException("test");
+            ex.MessageHeader.Should().Be("Bad Request");
+            ((int)ex.StatusCode).Should().Be(400);
         }
 
         [TestMethod]
         public void NotAuthorizedException_Throws_401Error()
         {
-            try
-            {
-                ThrowException(new NotAuthorizedException(string.Empty));
-            }
-            catch (NotAuthorizedException ex)
-            {
-                ex.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-                ex.MessageHeader.Should().Be("Not authorized");
-                ex.MessageHeader.Should().NotBe("Not authorised");
-                ((int)ex.StatusCode).Should().Be(401);
-            }
+            Action act = () => ThrowException(new NotAuthorizedException(string.Empty));
+
+            act.Should().Throw<NotAuthorizedException>()
+                .Which.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        }
+
+        [TestMethod]
+        public void NotAuthorizedException_HasCorrectDefaultHeader()
+        {
+            var ex = new NotAuthorizedException("test");
+            ex.MessageHeader.Should().Be("Not authorized");
+            ex.MessageHeader.Should().NotBe("Not authorised");
+            ((int)ex.StatusCode).Should().Be(401);
         }
 
         [TestMethod]
         public void ForbiddenException_Throws_403Error()
         {
-            try
-            {
-                ThrowException(new ForbiddenException(string.Empty));
-            }
-            catch (ForbiddenException ex)
-            {
-                ex.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-                ex.MessageHeader.Should().Be("Forbidden");
-                ((int)ex.StatusCode).Should().Be(403);
-            }
+            Action act = () => ThrowException(new ForbiddenException(string.Empty));
+
+            act.Should().Throw<ForbiddenException>()
+                .Which.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        }
+
+        [TestMethod]
+        public void ForbiddenException_HasCorrectDefaultHeader()
+        {
+            var ex = new ForbiddenException("test");
+            ex.MessageHeader.Should().Be("Forbidden");
+            ((int)ex.StatusCode).Should().Be(403);
         }
 
         [TestMethod]
         public void EntityNotFoundException_Throws_404Error()
         {
-            try
-            {
-                ThrowException(new EntityNotFoundException(string.Empty));
-            }
-            catch (EntityNotFoundException ex)
-            {
-                ex.StatusCode.Should().Be(HttpStatusCode.NotFound);
-                ex.MessageHeader.Should().Be("Not found");
-                ((int)ex.StatusCode).Should().Be(404);
-            }
+            Action act = () => ThrowException(new EntityNotFoundException(string.Empty));
+
+            act.Should().Throw<EntityNotFoundException>()
+                .Which.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
+        [TestMethod]
+        public void EntityNotFoundException_HasCorrectDefaultHeader()
+        {
+            var ex = new EntityNotFoundException("test");
+            ex.MessageHeader.Should().Be("Not found");
+            ((int)ex.StatusCode).Should().Be(404);
         }
 
         [TestMethod]
         public void BusinessException_Throws_409Error()
         {
-            try
-            {
-                ThrowException(new BusinessException(string.Empty));
-            }
-            catch (BusinessException ex)
-            {
-                ex.StatusCode.Should().Be(HttpStatusCode.Conflict);
-                ex.MessageHeader.Should().Be("Business rule violation");
-                ((int)ex.StatusCode).Should().Be(409);
-            }
+            Action act = () => ThrowException(new BusinessException(string.Empty));
+
+            act.Should().Throw<BusinessException>()
+                .Which.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        }
+
+        [TestMethod]
+        public void BusinessException_HasCorrectDefaultHeader()
+        {
+            var ex = new BusinessException("test");
+            ex.MessageHeader.Should().Be("Business rule violation");
+            ((int)ex.StatusCode).Should().Be(409);
         }
 
         [TestMethod]
         public void ConflictException_Throws_409Error()
         {
-            try
-            {
-                ThrowException(new ConflictException(string.Empty));
-            }
-            catch (ConflictException ex)
-            {
-                ex.StatusCode.Should().Be(HttpStatusCode.Conflict);
-                ex.MessageHeader.Should().Be("Conflict");
-                ((int)ex.StatusCode).Should().Be(409);
-            }
+            Action act = () => ThrowException(new ConflictException(string.Empty));
+
+            act.Should().Throw<ConflictException>()
+                .Which.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        }
+
+        [TestMethod]
+        public void ConflictException_HasCorrectDefaultHeader()
+        {
+            var ex = new ConflictException("test");
+            ex.MessageHeader.Should().Be("Conflict");
+            ((int)ex.StatusCode).Should().Be(409);
         }
 
         [TestMethod]
         public void DuplicateFoundException_Throws_409Error()
         {
-            try
-            {
-                ThrowException(new DuplicateFoundException(string.Empty));
-            }
-            catch (DuplicateFoundException ex)
-            {
-                ex.StatusCode.Should().Be(HttpStatusCode.Conflict);
-                ex.MessageHeader.Should().Be("Duplicate found");
-                ((int)ex.StatusCode).Should().Be(409);
-            }
+            Action act = () => ThrowException(new DuplicateFoundException(string.Empty));
+
+            act.Should().Throw<DuplicateFoundException>()
+                .Which.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        }
+
+        [TestMethod]
+        public void DuplicateFoundException_HasCorrectDefaultHeader()
+        {
+            var ex = new DuplicateFoundException("test");
+            ex.MessageHeader.Should().Be("Duplicate found");
+            ((int)ex.StatusCode).Should().Be(409);
         }
 
         [TestMethod]
         public void TechnicalException_Throws_500Error()
         {
-            try
-            {
-                ThrowException(new TechnicalException(string.Empty));
-            }
-            catch (TechnicalException ex)
-            {
-                ex.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
-                ex.MessageHeader.Should().Be("Internal server error");
-                ((int)ex.StatusCode).Should().Be(500);
-            }
+            Action act = () => ThrowException(new TechnicalException(string.Empty));
+
+            act.Should().Throw<TechnicalException>()
+                .Which.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
         }
 
         [TestMethod]
-        public void MethodNotImplemented_Throws_501Error()
+        public void TechnicalException_HasCorrectDefaultHeader()
         {
-            try
-            {
-                ThrowException(new MethodNotAvailableException(string.Empty));
-            }
-            catch (MethodNotAvailableException ex)
-            {
-                ex.StatusCode.Should().Be(HttpStatusCode.NotImplemented);
-                ex.MessageHeader.Should().Be("Method not available");
-                ((int)ex.StatusCode).Should().Be(501);
-            }
+            var ex = new TechnicalException("test");
+            ex.MessageHeader.Should().Be("Internal server error");
+            ((int)ex.StatusCode).Should().Be(500);
+        }
+
+        [TestMethod]
+        public void TechnicalException_DefaultConstructor_HasDefaultMessage()
+        {
+            var ex = new TechnicalException();
+            ex.Message.Should().Be("Please contact the system administrator");
+            ex.MessageHeader.Should().Be("Internal server error");
+        }
+
+        [TestMethod]
+        public void MethodNotAvailableException_Throws_501Error()
+        {
+            Action act = () => ThrowException(new MethodNotAvailableException(string.Empty));
+
+            act.Should().Throw<MethodNotAvailableException>()
+                .Which.StatusCode.Should().Be(HttpStatusCode.NotImplemented);
+        }
+
+        [TestMethod]
+        public void MethodNotAvailableException_HasCorrectDefaultHeader()
+        {
+            var ex = new MethodNotAvailableException("test");
+            ex.MessageHeader.Should().Be("Method not available");
+            ((int)ex.StatusCode).Should().Be(501);
+        }
+
+        [TestMethod]
+        public void ExceptionBase_CustomMessageHeader_Overrides()
+        {
+            var ex = new BadRequestException("msg", "Custom Header");
+            ex.MessageHeader.Should().Be("Custom Header");
+            ex.Message.Should().Be("msg");
+        }
+
+        [TestMethod]
+        public void ExceptionBase_InnerException_IsPreserved()
+        {
+            var inner = new InvalidOperationException("inner");
+            var ex = new BadRequestException("outer", innerException: inner);
+            ex.InnerException.Should().BeSameAs(inner);
         }
     }
 }

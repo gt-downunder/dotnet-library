@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <RootNamespace>Grondo</RootNamespace>
+        <AssemblyName>Grondo</AssemblyName>
+        <LangVersion>14</LangVersion>
+
+        <!-- NuGet package metadata -->
+        <PackageId>Grondo</PackageId>
+        <Title>Grondo</Title>
+        <Description>C# 14 / .NET 10 extension methods, utilities, and custom exception types</Description>
+        <PackageTags>csharp dotnet extensions utilities exceptions grondo</PackageTags>
+        <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/gt-downunder/dotnet-library</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/gt-downunder/dotnet-library.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+
+        <!-- XML documentation -->
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+        <!-- Deterministic / reproducible builds -->
+        <Deterministic>true</Deterministic>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+        <!-- Symbol package for debugging -->
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+    </ItemGroup>
+
+    <!-- Source Link: enables F12-into-source for NuGet consumers -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.*" PrivateAssets="All"/>
+    </ItemGroup>
+
+    <!-- Include README and LICENSE in the NuGet package -->
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\LICENSE.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+</Project>

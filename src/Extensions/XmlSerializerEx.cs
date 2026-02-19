@@ -1,44 +1,58 @@
-﻿using System.Xml.Serialization;
+﻿using System.Collections.Concurrent;
+using System.Xml;
+using System.Xml.Serialization;
 
-namespace DotNet.Library.Extensions
+namespace Grondo.Extensions
 {
+    /// <summary>
+    /// Provides extension methods for XML serialization and deserialization.
+    /// </summary>
     public static class XmlSerializerEx
     {
-        /// <summary>
-        /// Serializes the specified entity into an XML string.
-        /// </summary>
-        /// <typeparam name="T">The type of the entity to serialize.</typeparam>
-        /// <param name="entity">The entity instance to serialize.</param>
-        /// <returns>An XML string representation of the entity.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="entity"/> is null.</exception>
-        public static string Serialize<T>(this T entity)
+        private static readonly ConcurrentDictionary<Type, XmlSerializer> _serializerCache = new();
+
+        private static XmlSerializer GetSerializer(Type type) =>
+            _serializerCache.GetOrAdd(type, t => new XmlSerializer(t));
+
+        extension<T>(T entity) where T : class
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            /// <summary>
+            /// Serializes the specified entity into an XML string.
+            /// </summary>
+            /// <returns>An XML string representation of the entity.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the entity is null.</exception>
+            public string Serialize()
+            {
+                ArgumentNullException.ThrowIfNull(entity);
 
-            var serializer = new XmlSerializer(typeof(T));
-            using var sw = new StringWriter();
-            serializer.Serialize(sw, entity);
+                XmlSerializer serializer = GetSerializer(typeof(T));
+                using var sw = new StringWriter();
+                serializer.Serialize(sw, entity);
 
-            return sw.ToString();
+                return sw.ToString();
+            }
         }
 
-        /// <summary>
-        /// Deserializes the specified XML string into an object of type <typeparamref name="T"/>.
-        /// </summary>
-        /// <typeparam name="T">The type of object to deserialize into.</typeparam>
-        /// <param name="xml">The XML string to deserialize.</param>
-        /// <returns>
-        /// An instance of type <typeparamref name="T"/> if deserialization succeeds; 
-        /// otherwise, <c>null</c>.
-        /// </returns>
-        public static T? Deserialize<T>(this string xml)
+        extension(string xml)
         {
-            if (string.IsNullOrWhiteSpace(xml)) return default;
+            /// <summary>
+            /// Deserializes the specified XML string into an object of type <typeparamref name="T"/>.
+            /// </summary>
+            /// <typeparam name="T">The type of object to deserialize into.</typeparam>
+            /// <returns>
+            /// An instance of type <typeparamref name="T"/> if deserialization succeeds;
+            /// otherwise, <c>null</c>.
+            /// </returns>
+            public T? Deserialize<T>()
+            {
+                if (string.IsNullOrWhiteSpace(xml)) return default;
 
-            var serializer = new XmlSerializer(typeof(T));
-            using var sr = new StringReader(xml);
+                XmlSerializer serializer = GetSerializer(typeof(T));
+                using var sr = new StringReader(xml);
+                using var reader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit });
 
-            return (T?)serializer.Deserialize(sr);
+                return (T?)serializer.Deserialize(reader);
+            }
         }
     }
 }

@@ -7,16 +7,16 @@ on:
             - main
 
 env:
-  DOTNET_SDK_VERSION: 9.0.x
+  DOTNET_SDK_VERSION: 10.0.x
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
   DOTNET_NOLOGO: true
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.set_version.outputs.VERSION }}
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -24,8 +24,9 @@ jobs:
     - name: Generate dynamic version number
       id: set_version
       run: |
-          echo "VERSION=1.0.${{ github.run_number }}" >> $GITHUB_ENV
-          echo "VERSION=1.0.${{ github.run_number }}" >> $GITHUB_OUTPUT
+          VERSION="1.0.${{ github.run_number }}"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
@@ -33,43 +34,54 @@ jobs:
         dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
 
     - name: Restore dependencies
-      run: dotnet restore ./_package/DotNet.Library.csproj
+      run: dotnet restore Grondo.sln
 
-    - name: Build projects
-      run: dotnet build ./_package/DotNet.Library.csproj --no-restore -c Release -o ./publish/
+    - name: Build
+      run: dotnet build Grondo.sln --no-restore -c Release
 
-    # - name: Run tests
-    #   run: dotnet test
+    - name: Run tests with coverage
+      run: >-
+        dotnet test tests/Grondo.Tests.csproj --no-restore -c Release
+        --collect:"XPlat Code Coverage"
+        --results-directory ./coverage
 
-    - name: Upload compiled binaries as artifacts
+    - name: Install ReportGenerator
+      run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+    - name: Generate coverage report
+      run: >-
+        reportgenerator
+        -reports:./coverage/**/coverage.cobertura.xml
+        -targetdir:./coverage/report
+        -reporttypes:MarkdownSummaryGithub
+
+    - name: Write coverage to job summary
+      run: cat ./coverage/report/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+
+    - name: Pack
+      run: dotnet pack src/Grondo.csproj --no-build -c Release -p:PackageVersion=${{ env.VERSION }} -o ./nupkgs/
+
+    - name: Upload NuGet packages
       uses: actions/upload-artifact@v4
       with:
-        name: build-output-${{ env.VERSION }}
-        path: ./publish/
-
+        name: nupkgs-${{ env.VERSION }}
+        path: ./nupkgs/
 
   publish:
     needs: build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup NuGet CLI
-      uses: nuget/setup-nuget@v2
-
-    - name: Download build artifacts
+    - name: Download NuGet packages
       uses: actions/download-artifact@v4
       with:
-        name: build-output-${{ needs.build.outputs.VERSION }}
-        path: ./publish/
+        name: nupkgs-${{ needs.build.outputs.VERSION }}
+        path: ./nupkgs/
 
-    - name: Update version in .nuspec file
-      run: sed -i "s/<version>.*<\/version>/<version>${{ needs.build.outputs.VERSION }}<\/version>/" package.nuspec 
-
-    - name: Pack the project
-      run: nuget pack package.nuspec
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
 
     - name: Push to NuGet
-      run: nuget push GT.DotNet.Library.${{ needs.build.outputs.VERSION }}.nupkg ${{ secrets.nuget_api_key }} -src https://api.nuget.org/v3/index.json
+      run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.nuget_api_key }} --source https://api.nuget.org/v3/index.json --skip-duplicate

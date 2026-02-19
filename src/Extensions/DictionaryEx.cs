@@ -1,139 +1,185 @@
 ﻿using System.Text.Json;
+using Grondo.Utilities;
 
-namespace DotNet.Library.Extensions
+namespace Grondo.Extensions
 {
+    /// <summary>
+    /// Provides extension methods for <see cref="IDictionary{TKey, TValue}"/>.
+    /// </summary>
     public static class DictionaryEx
     {
-        /// <summary>
-        /// Serializes the dictionary into a JSON string.
-        /// </summary>
-        /// <typeparam name="TK">The type of keys in the dictionary.</typeparam>
-        /// <typeparam name="TV">The type of values in the dictionary.</typeparam>
-        /// <param name="source">The dictionary to serialize.</param>
-        /// <returns>A JSON string representation of the dictionary.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="source"/> is null.</exception>
-        public static string ToJson<TK, TV>(this IDictionary<TK, TV> source) =>
-            JsonSerializer.Serialize(source ?? throw new ArgumentNullException(nameof(source)));
-
-        /// <summary>
-        /// Determines whether the dictionary contains the specified key and its value is not null.
-        /// </summary>
-        /// <typeparam name="TK">The type of keys in the dictionary.</typeparam>
-        /// <typeparam name="TV">The type of values in the dictionary.</typeparam>
-        /// <param name="source">The dictionary to check.</param>
-        /// <param name="key">The key to locate.</param>
-        /// <returns><c>true</c> if the dictionary contains the key and its value is not null; otherwise, <c>false</c>.</returns>
-        public static bool HasKeyAndValue<TK, TV>(this IDictionary<TK, TV> source, TK key) =>
-            source.ContainsKey(key) && source[key] is not null;
-
-        /// <summary>
-        /// Determines whether the dictionary contains any of the specified keys.
-        /// </summary>
-        /// <typeparam name="TK">The type of keys in the dictionary.</typeparam>
-        /// <typeparam name="TV">The type of values in the dictionary.</typeparam>
-        /// <param name="source">The dictionary to check.</param>
-        /// <param name="keyList">An array of keys to search for.</param>
-        /// <returns><c>true</c> if any of the keys are present in the dictionary; otherwise, <c>false</c>.</returns>
-        public static bool HasAnyKey<TK, TV>(this IDictionary<TK, TV> source, TK[]? keyList) =>
-            keyList != null && keyList.Any(source.ContainsKey);
-
-        /// <summary>
-        /// Retrieves the value associated with the specified key, or the default value if the key is not found.
-        /// </summary>
-        /// <typeparam name="TK">The type of keys in the dictionary.</typeparam>
-        /// <typeparam name="TV">The type of values in the dictionary.</typeparam>
-        /// <param name="source">The dictionary to search.</param>
-        /// <param name="key">The key to locate.</param>
-        /// <returns>The value associated with the key if found; otherwise, the default value of <typeparamref name="TV"/>.</returns>
-        public static TV? GetValueOrDefault<TK, TV>(this IDictionary<TK, TV?> source, TK key) =>
-            source.TryGetValue(key, out var value) ? value : default;
-
-        /// <summary>
-        /// Adds a key-value pair to a nested dictionary stored as a JSON string within the parent dictionary.
-        /// </summary>
-        /// <param name="dict">The parent dictionary containing the nested dictionary as a JSON string.</param>
-        /// <param name="fieldName">The key in the parent dictionary that stores the nested dictionary.</param>
-        /// <param name="key">The key to add to the nested dictionary.</param>
-        /// <param name="value">The value to add to the nested dictionary.</param>
-        public static void AddEntryToNestedDictionary(this IDictionary<string, string> dict, string fieldName, string key, string value)
+        extension<TK, TV>(IDictionary<TK, TV> source)
         {
-            Dictionary<string, string> links = string.IsNullOrWhiteSpace(dict[fieldName])
-                ? new Dictionary<string, string>()
-                : JsonSerializer.Deserialize<Dictionary<string, string>>(dict[fieldName]) ??
-                  new Dictionary<string, string>();
+            /// <summary>
+            /// Serializes the dictionary into a JSON string.
+            /// </summary>
+            /// <returns>A JSON string representation of the dictionary.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the source is null.</exception>
+            public string ToJson()
+            {
+                ArgumentNullException.ThrowIfNull(source);
+                return JsonSerializer.Serialize(source, JsonDefaults.Default);
+            }
 
-            links[key] = value;
-            dict[fieldName] = JsonSerializer.Serialize(links);
+            /// <summary>
+            /// Determines whether the dictionary contains the specified key and its value is not null.
+            /// </summary>
+            /// <param name="key">The key to locate.</param>
+            /// <returns><c>true</c> if the dictionary contains the key and its value is not null; otherwise, <c>false</c>.</returns>
+            public bool HasKeyAndValue(TK key) =>
+                source.TryGetValue(key, out TV? value) && value is not null;
+
+            /// <summary>
+            /// Determines whether the dictionary contains any of the specified keys.
+            /// </summary>
+            /// <param name="keyList">An array of keys to search for.</param>
+            /// <returns><c>true</c> if any of the keys are present in the dictionary; otherwise, <c>false</c>.</returns>
+            public bool HasAnyKey(TK[]? keyList)
+            {
+                if (keyList is null) return false;
+
+                foreach (TK? key in keyList)
+                {
+                    if (key is not null && source.ContainsKey(key)) return true;
+                }
+
+                return false;
+            }
+
+            /// <summary>
+            /// Converts the dictionary into a URL query string.
+            /// </summary>
+            /// <returns>A query string representation of the dictionary, or an empty string if the dictionary is empty.</returns>
+            public string ToQueryString() =>
+                source.Any()
+                    ? "?" + string.Join("&", source.Select(kv =>
+                        $"{Uri.EscapeDataString(kv.Key?.ToString() ?? string.Empty)}={Uri.EscapeDataString(kv.Value?.ToString() ?? string.Empty)}"))
+                    : string.Empty;
+
+            /// <summary>
+            /// Returns a string representation of the dictionary in a debug-friendly format.
+            /// </summary>
+            /// <returns>A string representation of the dictionary in the form "{key=value, ...}".</returns>
+            public string ToDebugString() =>
+                "{" + string.Join(", ", source.Select(kv => $"{kv.Key}={kv.Value}")) + "}";
+
+            /// <summary>
+            /// Determines whether two dictionaries contain the same key-value pairs.
+            /// </summary>
+            /// <param name="other">The dictionary to compare with.</param>
+            /// <returns><c>true</c> if both dictionaries contain the same key-value pairs; otherwise, <c>false</c>.</returns>
+            public bool IsDeepEqualTo(IDictionary<TK, TV> other)
+            {
+                ArgumentNullException.ThrowIfNull(source);
+                ArgumentNullException.ThrowIfNull(other);
+                return source.Count == other.Count && source.All(kv =>
+                    other.TryGetValue(kv.Key, out TV? val) && EqualityComparer<TV>.Default.Equals(kv.Value, val));
+            }
+
+            /// <summary>
+            /// Merges another dictionary into this dictionary. If a key already exists, its value
+            /// is overwritten when <paramref name="overwrite"/> is <c>true</c>; otherwise, existing values are preserved.
+            /// </summary>
+            /// <param name="other">The dictionary to merge from.</param>
+            /// <param name="overwrite">Whether to overwrite existing keys. Defaults to <c>true</c>.</param>
+            /// <exception cref="ArgumentNullException">Thrown if the source or <paramref name="other"/> is null.</exception>
+            public void Merge(IDictionary<TK, TV> other, bool overwrite = true)
+            {
+                ArgumentNullException.ThrowIfNull(source);
+                ArgumentNullException.ThrowIfNull(other);
+
+                foreach (KeyValuePair<TK, TV> kvp in other)
+                {
+                    if (overwrite || !source.ContainsKey(kvp.Key))
+                        source[kvp.Key] = kvp.Value;
+                }
+            }
+
+            /// <summary>
+            /// Gets the value associated with the specified key. If the key does not exist,
+            /// the value is created using the factory, added to the dictionary, and returned.
+            /// </summary>
+            /// <param name="key">The key to locate.</param>
+            /// <param name="factory">The function to create a value if the key does not exist.</param>
+            /// <returns>The existing or newly created value.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the source, <paramref name="key"/>, or <paramref name="factory"/> is null.</exception>
+            public TV GetOrAdd(TK key, Func<TV> factory)
+            {
+                ArgumentNullException.ThrowIfNull(source);
+                ArgumentNullException.ThrowIfNull(key);
+                ArgumentNullException.ThrowIfNull(factory);
+
+                if (source.TryGetValue(key, out TV? existing))
+                    return existing;
+
+                TV newValue = factory();
+                source[key] = newValue;
+                return newValue;
+            }
         }
 
-        /// <summary>
-        /// Removes a key-value pair from a nested dictionary stored as a JSON string within the parent dictionary.
-        /// </summary>
-        /// <param name="dict">The parent dictionary containing the nested dictionary as a JSON string.</param>
-        /// <param name="fieldName">The key in the parent dictionary that stores the nested dictionary.</param>
-        /// <param name="key">The key to remove from the nested dictionary.</param>
-        public static void RemoveEntryFromNestedDictionary(this IDictionary<string, string> dict, string fieldName, string key)
+        extension<TK, TV>(IDictionary<TK, TV?> source)
         {
-            if (string.IsNullOrWhiteSpace(dict[fieldName])) return;
-
-            var links = JsonSerializer.Deserialize<Dictionary<string, string>>(dict[fieldName]);
-            if (links == null) return;
-
-            links.Remove(key);
-            dict[fieldName] = JsonSerializer.Serialize(links);
+            /// <summary>
+            /// Retrieves the value associated with the specified key, or the default value if the key is not found.
+            /// </summary>
+            /// <param name="key">The key to locate.</param>
+            /// <returns>The value associated with the key if found; otherwise, the default value of <typeparamref name="TV"/>.</returns>
+            public TV? GetValueOrDefault(TK key) =>
+                source.TryGetValue(key, out TV? value) ? value : default;
         }
 
-        /// <summary>
-        /// Determines whether two dictionaries contain the same key-value pairs.
-        /// </summary>
-        /// <typeparam name="TKey">The type of keys in the dictionaries.</typeparam>
-        /// <typeparam name="TValue">The type of values in the dictionaries.</typeparam>
-        /// <param name="dict">The source dictionary.</param>
-        /// <param name="other">The dictionary to compare with.</param>
-        /// <returns><c>true</c> if both dictionaries contain the same key-value pairs; otherwise, <c>false</c>.</returns>
-        public static bool IsDeepEqualTo<TKey, TValue>(this IDictionary<TKey, TValue> dict, IDictionary<TKey, TValue> other) where TKey : notnull =>
-            dict.Count == other.Count && dict.All(kv =>
-                other.TryGetValue(kv.Key, out var val) && EqualityComparer<TValue>.Default.Equals(kv.Value, val));
-
-        /// <summary>
-        /// Determines whether the dictionary contains the same key-value pairs as a serialized dictionary string.
-        /// </summary>
-        /// <typeparam name="TKey">The type of keys in the dictionary.</typeparam>
-        /// <typeparam name="TValue">The type of values in the dictionary.</typeparam>
-        /// <param name="dict">The source dictionary.</param>
-        /// <param name="serializedDictionary">A JSON string representing the target dictionary.</param>
-        /// <returns><c>true</c> if both dictionaries contain the same key-value pairs; otherwise, <c>false</c>.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializedDictionary"/> is null or whitespace.</exception>
-        public static bool IsDeepEqualTo<TKey, TValue>(this IDictionary<TKey, TValue> dict, string serializedDictionary) where TKey : notnull
+        extension<TKey, TValue>(IDictionary<TKey, TValue> dict) where TKey : notnull
         {
-            if (string.IsNullOrWhiteSpace(serializedDictionary))
-                throw new ArgumentNullException(nameof(serializedDictionary));
+            /// <summary>
+            /// Determines whether the dictionary contains the same key-value pairs as a serialized dictionary string.
+            /// </summary>
+            /// <param name="serializedDictionary">A JSON string representing the target dictionary.</param>
+            /// <returns><c>true</c> if both dictionaries contain the same key-value pairs; otherwise, <c>false</c>.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializedDictionary"/> is null or whitespace.</exception>
+            public bool IsDeepEqualTo(string serializedDictionary)
+            {
+                if (string.IsNullOrWhiteSpace(serializedDictionary))
+                    throw new ArgumentNullException(nameof(serializedDictionary));
 
-            var deserialized = JsonSerializer.Deserialize<Dictionary<TKey, TValue>>(serializedDictionary);
-            return deserialized != null && dict.IsDeepEqualTo(deserialized);
+                Dictionary<TKey, TValue>? deserialized = JsonSerializer.Deserialize<Dictionary<TKey, TValue>>(serializedDictionary, JsonDefaults.CaseInsensitive);
+                return deserialized != null && dict.IsDeepEqualTo(deserialized);
+            }
         }
 
-        /// <summary>
-        /// Returns a string representation of the dictionary in a debug-friendly format.
-        /// </summary>
-        /// <typeparam name="TKey">The type of keys in the dictionary.</typeparam>
-        /// <typeparam name="TValue">The type of values in the dictionary.</typeparam>
-        /// <param name="dictionary">The dictionary to format.</param>
-        /// <returns>A string representation of the dictionary in the form "{key=value, ...}".</returns>
-        public static string ToDebugString<TKey, TValue>(this IDictionary<TKey, TValue> dictionary) =>
-            "{" + string.Join(", ", dictionary.Select(kv => $"{kv.Key}={kv.Value}")) + "}";
+        extension(IDictionary<string, string> dict)
+        {
+            /// <summary>
+            /// Adds a key-value pair to a nested dictionary stored as a JSON string within the parent dictionary.
+            /// </summary>
+            /// <param name="fieldName">The key in the parent dictionary that stores the nested dictionary.</param>
+            /// <param name="key">The key to add to the nested dictionary.</param>
+            /// <param name="value">The value to add to the nested dictionary.</param>
+            public void AddEntryToNestedDictionary(string fieldName, string key, string value)
+            {
+                Dictionary<string, string> links = dict.TryGetValue(fieldName, out string? existing) && !string.IsNullOrWhiteSpace(existing)
+                    ? JsonSerializer.Deserialize<Dictionary<string, string>>(existing, JsonDefaults.CaseInsensitive) ?? []
+                    : [];
 
-        /// <summary>
-        /// Converts the dictionary into a URL query string.
-        /// </summary>
-        /// <typeparam name="TK">The type of keys in the dictionary.</typeparam>
-        /// <typeparam name="TV">The type of values in the dictionary.</typeparam>
-        /// <param name="source">The dictionary to convert.</param>
-        /// <returns>A query string representation of the dictionary, or an empty string if the dictionary is empty.</returns>
-        public static string ToQueryString<TK, TV>(this IDictionary<TK, TV> source) =>
-            source.Any()
-                ? "?" + string.Join("&", source.Select(kv =>
-                    $"{Uri.EscapeDataString(kv.Key?.ToString() ?? string.Empty)}={Uri.EscapeDataString(kv.Value?.ToString() ?? string.Empty)}"))
-                : string.Empty;
+                links[key] = value;
+                dict[fieldName] = JsonSerializer.Serialize(links, JsonDefaults.Default);
+            }
+
+            /// <summary>
+            /// Removes a key-value pair from a nested dictionary stored as a JSON string within the parent dictionary.
+            /// </summary>
+            /// <param name="fieldName">The key in the parent dictionary that stores the nested dictionary.</param>
+            /// <param name="key">The key to remove from the nested dictionary.</param>
+            public void RemoveEntryFromNestedDictionary(string fieldName, string key)
+            {
+                if (!dict.TryGetValue(fieldName, out string? existing) || string.IsNullOrWhiteSpace(existing)) return;
+
+                Dictionary<string, string>? links = JsonSerializer.Deserialize<Dictionary<string, string>>(existing, JsonDefaults.CaseInsensitive);
+                if (links == null) return;
+
+                links.Remove(key);
+                dict[fieldName] = JsonSerializer.Serialize(links, JsonDefaults.Default);
+            }
+        }
     }
 }
