@@ -11,16 +11,31 @@ namespace Grondo.Extensions
         extension(IHostEnvironment env)
         {
             /// <summary>Determines whether the hosting environment is "local".</summary>
-            public bool IsLocal() =>
-                env.EnvironmentName.EqualsIgnoreCase(Environments.Local);
+            /// <returns><c>true</c> if the environment name is "local" (case-insensitive); otherwise, <c>false</c>.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the environment is <c>null</c>.</exception>
+            public bool IsLocal()
+            {
+                ArgumentNullException.ThrowIfNull(env);
+                return env.EnvironmentName.EqualsIgnoreCase(Environments.Local);
+            }
 
             /// <summary>Determines whether the hosting environment is "test".</summary>
-            public bool IsTest() =>
-                env.EnvironmentName.EqualsIgnoreCase(Environments.Test);
+            /// <returns><c>true</c> if the environment name is "test" (case-insensitive); otherwise, <c>false</c>.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the environment is <c>null</c>.</exception>
+            public bool IsTest()
+            {
+                ArgumentNullException.ThrowIfNull(env);
+                return env.EnvironmentName.EqualsIgnoreCase(Environments.Test);
+            }
 
             /// <summary>Determines whether the hosting environment is "uat".</summary>
-            public bool IsUat() =>
-                env.EnvironmentName.EqualsIgnoreCase(Environments.Uat);
+            /// <returns><c>true</c> if the environment name is "uat" (case-insensitive); otherwise, <c>false</c>.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the environment is <c>null</c>.</exception>
+            public bool IsUat()
+            {
+                ArgumentNullException.ThrowIfNull(env);
+                return env.EnvironmentName.EqualsIgnoreCase(Environments.Uat);
+            }
 
             // Built-in ones already exist: IsDevelopment(), IsProduction(), IsStaging()
         }

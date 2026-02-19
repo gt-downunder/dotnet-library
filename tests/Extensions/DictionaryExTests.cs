@@ -83,7 +83,8 @@ namespace Grondo.Tests.Extensions
         {
             Dictionary<string, object> dict = GetRandomStringObjectDictionary(10);
 
-            Assert.ThrowsExactly<ArgumentNullException>(() => dict.TryGetValue(null!, out _));
+            Action act = () => dict.TryGetValue(null!, out _);
+            act.Should().Throw<ArgumentNullException>();
         }
 
         private static Dictionary<string, object> GetRandomStringObjectDictionary(int size)
@@ -92,17 +93,7 @@ namespace Grondo.Tests.Extensions
 
             for (int i = 0; dict.Count < size; i++)
             {
-                try
-                {
-                    dict.Add(RandomFactory.GetAlphanumericString(50), i);
-                }
-                catch (ArgumentException ex)
-                {
-                    if (ex.Message.Contains("An item with the same key has already been added."))
-                    {
-                        // swallow, it's reasonable, as unlikely as it may be, that we might generate the same random value twice
-                    }
-                }
+                dict.TryAdd(RandomFactory.GetAlphanumericString(50), i);
             }
 
             return dict;

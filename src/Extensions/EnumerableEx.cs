@@ -149,6 +149,246 @@
                 return (matches, nonMatches);
             }
 
+            /// <summary>
+            /// Interleaves the elements of this sequence with another sequence,
+            /// alternating elements from each. If one sequence is longer, remaining elements are appended.
+            /// </summary>
+            /// <param name="other">The other sequence to interleave with.</param>
+            /// <returns>A sequence with elements alternating from both sequences.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the source or <paramref name="other"/> is null.</exception>
+            public IEnumerable<T> Interleave(IEnumerable<T> other)
+            {
+                ArgumentNullException.ThrowIfNull(source);
+                ArgumentNullException.ThrowIfNull(other);
+
+                using IEnumerator<T> e1 = source.GetEnumerator();
+                using IEnumerator<T> e2 = other.GetEnumerator();
+                bool has1 = e1.MoveNext();
+                bool has2 = e2.MoveNext();
+
+                while (has1 || has2)
+                {
+                    if (has1)
+                    {
+                        yield return e1.Current;
+                        has1 = e1.MoveNext();
+                    }
+
+                    if (has2)
+                    {
+                        yield return e2.Current;
+                        has2 = e2.MoveNext();
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Applies an accumulator function over a sequence and yields each intermediate result.
+            /// </summary>
+            /// <typeparam name="TAccumulate">The type of the accumulated value.</typeparam>
+            /// <param name="seed">The initial accumulator value.</param>
+            /// <param name="accumulator">The accumulator function applied to each element.</param>
+            /// <returns>A sequence of intermediate accumulated values.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the source or <paramref name="accumulator"/> is null.</exception>
+            public IEnumerable<TAccumulate> Scan<TAccumulate>(TAccumulate seed, Func<TAccumulate, T, TAccumulate> accumulator)
+            {
+                ArgumentNullException.ThrowIfNull(source);
+                ArgumentNullException.ThrowIfNull(accumulator);
+
+                TAccumulate state = seed;
+                foreach (T item in source)
+                {
+                    state = accumulator(state, item);
+                    yield return state;
+                }
+            }
+
+            /// <summary>
+            /// Applies an accumulator function over a sequence without a seed and yields each intermediate result.
+            /// The first element is used as the initial accumulator value.
+            /// </summary>
+            /// <param name="accumulator">The accumulator function applied to each consecutive pair.</param>
+            /// <returns>A sequence of intermediate accumulated values.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the source or <paramref name="accumulator"/> is null.</exception>
+            /// <exception cref="InvalidOperationException">Thrown if the source is empty.</exception>
+            public IEnumerable<T> Scan(Func<T, T, T> accumulator)
+            {
+                ArgumentNullException.ThrowIfNull(source);
+                ArgumentNullException.ThrowIfNull(accumulator);
+
+                using IEnumerator<T> enumerator = source.GetEnumerator();
+                if (!enumerator.MoveNext())
+                    throw new InvalidOperationException("Sequence contains no elements.");
+
+                T state = enumerator.Current;
+                yield return state;
+
+                while (enumerator.MoveNext())
+                {
+                    state = accumulator(state, enumerator.Current);
+                    yield return state;
+                }
+            }
+
+            /// <summary>
+            /// Returns overlapping windows of the specified size from the sequence.
+            /// </summary>
+            /// <param name="size">The size of each window.</param>
+            /// <returns>A sequence of overlapping windows, each as an <see cref="IReadOnlyList{T}"/>.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the source is null.</exception>
+            /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="size"/> is less than 1.</exception>
+            public IEnumerable<IReadOnlyList<T>> Window(int size)
+            {
+                ArgumentNullException.ThrowIfNull(source);
+                ArgumentOutOfRangeException.ThrowIfLessThan(size, 1);
+
+                var window = new List<T>(size);
+                foreach (T item in source)
+                {
+                    window.Add(item);
+                    if (window.Count == size)
+                    {
+                        yield return window.ToList().AsReadOnly();
+                        window.RemoveAt(0);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Returns a randomly shuffled copy of the sequence using the Fisher-Yates algorithm.
+            /// </summary>
+            /// <param name="random">An optional <see cref="Random"/> instance. If null, a shared instance is used.</param>
+            /// <returns>A shuffled copy of the sequence as an <see cref="IReadOnlyList{T}"/>.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the source is null.</exception>
+            public IReadOnlyList<T> Shuffle(Random? random = null)
+            {
+                ArgumentNullException.ThrowIfNull(source);
+
+                var list = source.ToList();
+                random ??= Random.Shared;
+
+                for (int i = list.Count - 1; i > 0; i--)
+                {
+                    int j = random.Next(i + 1);
+                    (list[i], list[j]) = (list[j], list[i]);
+                }
+
+                return list.AsReadOnly();
+            }
+
+            /// <summary>
+            /// Returns the elements of the source sequence, or the fallback values if the source is empty.
+            /// </summary>
+            /// <param name="fallback">The fallback values to return if the source is empty.</param>
+            /// <returns>The source sequence if non-empty; otherwise, the fallback values.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the source or <paramref name="fallback"/> is null.</exception>
+            public IEnumerable<T> FallbackIfEmpty(params T[] fallback)
+            {
+                ArgumentNullException.ThrowIfNull(source);
+                ArgumentNullException.ThrowIfNull(fallback);
+
+                return FallbackIfEmptyIterator(source, fallback);
+
+                static IEnumerable<T> FallbackIfEmptyIterator(IEnumerable<T> source, IEnumerable<T> fallback)
+                {
+                    bool hasElements = false;
+                    foreach (T item in source)
+                    {
+                        hasElements = true;
+                        yield return item;
+                    }
+
+                    if (!hasElements)
+                    {
+                        foreach (T item in fallback)
+                            yield return item;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Returns the elements of the source sequence, or the fallback sequence if the source is empty.
+            /// </summary>
+            /// <param name="fallback">The fallback sequence to return if the source is empty.</param>
+            /// <returns>The source sequence if non-empty; otherwise, the fallback sequence.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the source or <paramref name="fallback"/> is null.</exception>
+            public IEnumerable<T> FallbackIfEmpty(IEnumerable<T> fallback)
+            {
+                ArgumentNullException.ThrowIfNull(source);
+                ArgumentNullException.ThrowIfNull(fallback);
+
+                return FallbackIfEmptyIterator(source, fallback);
+
+                static IEnumerable<T> FallbackIfEmptyIterator(IEnumerable<T> source, IEnumerable<T> fallback)
+                {
+                    bool hasElements = false;
+                    foreach (T item in source)
+                    {
+                        hasElements = true;
+                        yield return item;
+                    }
+
+                    if (!hasElements)
+                    {
+                        foreach (T item in fallback)
+                            yield return item;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Applies a function to each consecutive pair of elements in the sequence.
+            /// </summary>
+            /// <typeparam name="TResult">The type of the result elements.</typeparam>
+            /// <param name="resultSelector">The function to apply to each consecutive pair.</param>
+            /// <returns>A sequence of results from applying the function to each pair.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the source or <paramref name="resultSelector"/> is null.</exception>
+            public IEnumerable<TResult> Pairwise<TResult>(Func<T, T, TResult> resultSelector)
+            {
+                ArgumentNullException.ThrowIfNull(source);
+                ArgumentNullException.ThrowIfNull(resultSelector);
+
+                using IEnumerator<T> enumerator = source.GetEnumerator();
+                if (!enumerator.MoveNext())
+                    yield break;
+
+                T previous = enumerator.Current;
+                while (enumerator.MoveNext())
+                {
+                    yield return resultSelector(previous, enumerator.Current);
+                    previous = enumerator.Current;
+                }
+            }
+
+            /// <summary>
+            /// Tags each element with whether it is the first and/or last element in the sequence.
+            /// </summary>
+            /// <typeparam name="TResult">The type of the result elements.</typeparam>
+            /// <param name="resultSelector">A function that receives each element along with isFirst and isLast flags.</param>
+            /// <returns>A sequence of tagged results.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the source or <paramref name="resultSelector"/> is null.</exception>
+            public IEnumerable<TResult> TagFirstLast<TResult>(Func<T, bool, bool, TResult> resultSelector)
+            {
+                ArgumentNullException.ThrowIfNull(source);
+                ArgumentNullException.ThrowIfNull(resultSelector);
+
+                using IEnumerator<T> enumerator = source.GetEnumerator();
+                if (!enumerator.MoveNext())
+                    yield break;
+
+                bool isFirst = true;
+                T current = enumerator.Current;
+
+                while (enumerator.MoveNext())
+                {
+                    yield return resultSelector(current, isFirst, false);
+                    isFirst = false;
+                    current = enumerator.Current;
+                }
+
+                yield return resultSelector(current, isFirst, true);
+            }
+
         }
 
         extension<T>(IEnumerable<T?> source)

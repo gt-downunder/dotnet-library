@@ -61,11 +61,11 @@ namespace Grondo.Extensions
                 new(date.Year, date.Month, date.Day, 0, 0, 0, date.Offset);
 
             /// <summary>
-            /// Returns a new <see cref="DateTimeOffset"/> representing the end of the day (23:59:59.999).
+            /// Returns a new <see cref="DateTimeOffset"/> representing the end of the day (23:59:59.9999999).
             /// </summary>
-            /// <returns>A new <see cref="DateTimeOffset"/> at the last moment of the same day.</returns>
+            /// <returns>A new <see cref="DateTimeOffset"/> at the last tick of the same day.</returns>
             public DateTimeOffset EndOfDay() =>
-                new(date.Year, date.Month, date.Day, 23, 59, 59, 999, date.Offset);
+                new DateTimeOffset(date.Year, date.Month, date.Day, 0, 0, 0, date.Offset).AddDays(1).AddTicks(-1);
 
             /// <summary>
             /// Returns a new <see cref="DateTimeOffset"/> representing the first day of the month.
@@ -79,7 +79,7 @@ namespace Grondo.Extensions
             /// </summary>
             /// <returns>A new <see cref="DateTimeOffset"/> at the end of the last day of the month.</returns>
             public DateTimeOffset EndOfMonth() =>
-                new(date.Year, date.Month, DateTime.DaysInMonth(date.Year, date.Month), 23, 59, 59, 999, date.Offset);
+                new DateTimeOffset(date.Year, date.Month, 1, 0, 0, 0, date.Offset).AddMonths(1).AddTicks(-1);
 
             /// <summary>
             /// Determines whether the specified <see cref="DateTimeOffset"/> falls between two dates, inclusive.
@@ -95,25 +95,8 @@ namespace Grondo.Extensions
             /// such as "3 hours ago" or "in 2 days".
             /// </summary>
             /// <returns>A relative time string.</returns>
-            public string ToRelativeTime()
-            {
-                TimeSpan diff = DateTimeOffset.UtcNow - date.ToUniversalTime();
-                bool isFuture = diff.TotalSeconds < 0;
-                TimeSpan absDiff = isFuture ? diff.Negate() : diff;
-
-                string relative = absDiff.TotalSeconds switch
-                {
-                    < 60 => "just now",
-                    < 3600 => $"{(int)absDiff.TotalMinutes} minute{((int)absDiff.TotalMinutes == 1 ? "" : "s")}",
-                    < 86400 => $"{(int)absDiff.TotalHours} hour{((int)absDiff.TotalHours == 1 ? "" : "s")}",
-                    < 2592000 => $"{(int)absDiff.TotalDays} day{((int)absDiff.TotalDays == 1 ? "" : "s")}",
-                    < 31536000 => $"{(int)(absDiff.TotalDays / 30)} month{((int)(absDiff.TotalDays / 30) == 1 ? "" : "s")}",
-                    _ => $"{(int)(absDiff.TotalDays / 365)} year{((int)(absDiff.TotalDays / 365) == 1 ? "" : "s")}"
-                };
-
-                if (relative == "just now") return relative;
-                return isFuture ? $"in {relative}" : $"{relative} ago";
-            }
+            public string ToRelativeTime() =>
+                TimeSpanEx.FormatRelativeTime(DateTimeOffset.UtcNow - date.ToUniversalTime());
         }
 
         extension(DateTimeOffset? date)

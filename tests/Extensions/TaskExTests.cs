@@ -184,6 +184,47 @@ namespace Grondo.Tests.Extensions
             caught!.Message.Should().Be("boom");
         }
 
+        // --- RetryAsync with exceptionFilter ---
+
+        [TestMethod]
+        public async Task RetryAsync_Generic_WithFilter_RetriesOnMatchingException()
+        {
+            int attempt = 0;
+            int result = await TaskEx.RetryAsync(() =>
+            {
+                attempt++;
+                if (attempt < 3) throw new InvalidOperationException("fail");
+                return Task.FromResult(42);
+            }, maxRetries: 3, delay: TimeSpan.FromMilliseconds(1), exceptionFilter: ex => ex is InvalidOperationException);
+
+            result.Should().Be(42);
+            attempt.Should().Be(3);
+        }
+
+        [TestMethod]
+        public async Task RetryAsync_Generic_WithFilter_DoesNotRetryOnNonMatchingException()
+        {
+            Func<Task> act = async () => await TaskEx.RetryAsync<int>(() =>
+                throw new ArgumentException("wrong type"),
+                maxRetries: 3, delay: TimeSpan.FromMilliseconds(1), exceptionFilter: ex => ex is InvalidOperationException);
+
+            await act.Should().ThrowAsync<ArgumentException>();
+        }
+
+        [TestMethod]
+        public async Task RetryAsync_NonGeneric_WithFilter_RetriesOnMatchingException()
+        {
+            int attempt = 0;
+            await TaskEx.RetryAsync(() =>
+            {
+                attempt++;
+                if (attempt < 2) throw new InvalidOperationException("fail");
+                return Task.CompletedTask;
+            }, maxRetries: 3, delay: TimeSpan.FromMilliseconds(1), exceptionFilter: ex => ex is InvalidOperationException);
+
+            attempt.Should().Be(2);
+        }
+
         public TestContext TestContext { get; set; } = null!;
     }
 }

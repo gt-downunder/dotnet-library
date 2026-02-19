@@ -51,10 +51,11 @@
         /// <param name="maxRetries">The maximum number of retry attempts. Defaults to 3.</param>
         /// <param name="delay">The initial delay between retries. Defaults to 1 second.</param>
         /// <param name="exponentialBackoff">Whether to double the delay after each retry. Defaults to <c>true</c>.</param>
+        /// <param name="exceptionFilter">An optional predicate to determine whether a given exception should be retried. If <c>null</c>, all exceptions are retried.</param>
         /// <returns>The result of the operation.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="operation"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="maxRetries"/> is negative.</exception>
-        public static async Task<T> RetryAsync<T>(Func<Task<T>> operation, int maxRetries = 3, TimeSpan? delay = null, bool exponentialBackoff = true)
+        public static async Task<T> RetryAsync<T>(Func<Task<T>> operation, int maxRetries = 3, TimeSpan? delay = null, bool exponentialBackoff = true, Func<Exception, bool>? exceptionFilter = null)
         {
             ArgumentNullException.ThrowIfNull(operation);
             ArgumentOutOfRangeException.ThrowIfNegative(maxRetries);
@@ -67,7 +68,7 @@
                 {
                     return await operation().ConfigureAwait(false);
                 }
-                catch when (attempt < maxRetries)
+                catch (Exception ex) when (attempt < maxRetries && (exceptionFilter?.Invoke(ex) ?? true))
                 {
                     await Task.Delay(currentDelay).ConfigureAwait(false);
                     if (exponentialBackoff)
@@ -84,29 +85,16 @@
         /// <param name="maxRetries">The maximum number of retry attempts. Defaults to 3.</param>
         /// <param name="delay">The initial delay between retries. Defaults to 1 second.</param>
         /// <param name="exponentialBackoff">Whether to double the delay after each retry. Defaults to <c>true</c>.</param>
+        /// <param name="exceptionFilter">An optional predicate to determine whether a given exception should be retried. If <c>null</c>, all exceptions are retried.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="operation"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="maxRetries"/> is negative.</exception>
-        public static async Task RetryAsync(Func<Task> operation, int maxRetries = 3, TimeSpan? delay = null, bool exponentialBackoff = true)
+        public static async Task RetryAsync(Func<Task> operation, int maxRetries = 3, TimeSpan? delay = null, bool exponentialBackoff = true, Func<Exception, bool>? exceptionFilter = null)
         {
-            ArgumentNullException.ThrowIfNull(operation);
-            ArgumentOutOfRangeException.ThrowIfNegative(maxRetries);
-
-            TimeSpan currentDelay = delay ?? TimeSpan.FromSeconds(1);
-
-            for (int attempt = 0; ; attempt++)
+            await RetryAsync<object?>(async () =>
             {
-                try
-                {
-                    await operation().ConfigureAwait(false);
-                    return;
-                }
-                catch when (attempt < maxRetries)
-                {
-                    await Task.Delay(currentDelay).ConfigureAwait(false);
-                    if (exponentialBackoff)
-                        currentDelay *= 2;
-                }
-            }
+                await operation().ConfigureAwait(false);
+                return null;
+            }, maxRetries, delay, exponentialBackoff, exceptionFilter).ConfigureAwait(false);
         }
 
         extension<T>(Task<T> task)

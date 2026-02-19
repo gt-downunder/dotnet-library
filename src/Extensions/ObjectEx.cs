@@ -84,8 +84,8 @@ namespace Grondo.Extensions
                 if (string.IsNullOrWhiteSpace(s)) return null;
 
                 return string.IsNullOrEmpty(format)
-                    ? DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.None, out global::System.DateTime dt1) ? dt1 : null
-                    : DateTime.TryParseExact(s, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out global::System.DateTime dt2)
+                    ? DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt1) ? dt1 : null
+                    : DateTime.TryParseExact(s, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt2)
                         ? dt2
                         : null;
             }
@@ -103,6 +103,20 @@ namespace Grondo.Extensions
                 obj is string s
                     ? new StringContent(s, Encoding.UTF8, contentType)
                     : new StringContent(JsonSerializer.Serialize(obj, JsonDefaults.Default), Encoding.UTF8, contentType);
+
+            /// <summary>
+            /// Executes a side-effect action on the value and returns the original value unchanged.
+            /// Useful for inserting debugging, logging, or other side-effects into a fluent chain.
+            /// </summary>
+            /// <param name="action">The side-effect action to execute on the value.</param>
+            /// <returns>The original value, unmodified.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if <paramref name="action"/> is null.</exception>
+            public T Pipe(Action<T> action)
+            {
+                ArgumentNullException.ThrowIfNull(action);
+                action(obj);
+                return obj;
+            }
         }
     }
 }

@@ -11,6 +11,8 @@
             /// Returns a list of string representations of all key Uri properties.
             /// Intended for debugging/logging.
             /// </summary>
+            /// <returns>A read-only list of formatted URI property strings.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the URI is <c>null</c>.</exception>
             public IReadOnlyList<string> DumpProperties()
             {
                 ArgumentNullException.ThrowIfNull(uri);

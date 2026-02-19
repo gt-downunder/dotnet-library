@@ -259,11 +259,12 @@ namespace Grondo.Tests
             }
         }
 
-        public static TEnumType GetEnum<TEnumType>() where TEnumType : struct
+        public static TEnumType GetEnum<TEnumType>() where TEnumType : struct, Enum
         {
             lock (_randLock)
             {
-                return Enum.Parse<TEnumType>(GetInteger(0, Enum.GetNames(typeof(TEnumType)).Length).ToString());
+                TEnumType[] values = Enum.GetValues<TEnumType>();
+                return values[_random.Next(values.Length)];
             }
         }
 

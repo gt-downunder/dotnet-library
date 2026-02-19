@@ -56,7 +56,10 @@ namespace Grondo.Extensions
                 ArgumentNullException.ThrowIfNull(hex);
                 return Convert.FromHexString(hex);
             }
+        }
 
+        extension(string base64)
+        {
             /// <summary>
             /// Converts a Base64-encoded string to a byte array.
             /// </summary>
@@ -65,8 +68,8 @@ namespace Grondo.Extensions
             /// <exception cref="FormatException">Thrown if the string is not a valid Base64 string.</exception>
             public byte[] FromBase64ToBytes()
             {
-                ArgumentNullException.ThrowIfNull(hex);
-                return Convert.FromBase64String(hex);
+                ArgumentNullException.ThrowIfNull(base64);
+                return Convert.FromBase64String(base64);
             }
         }
     }

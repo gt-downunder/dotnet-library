@@ -18,6 +18,9 @@ namespace Grondo.Extensions
         [GeneratedRegex("(^-|-$)")]
         private static partial Regex SlugTrimRegex();
 
+        [GeneratedRegex("(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|[-_]")]
+        private static partial Regex WordBoundaryRegex();
+
         private static readonly EmailAddressAttribute _emailAddressValidator = new();
 
         extension(string value)
@@ -61,30 +64,39 @@ namespace Grondo.Extensions
             /// <summary>
             /// Determines whether two strings are equal using case-insensitive comparison.
             /// </summary>
+            /// <param name="toCompare">The string to compare with.</param>
+            /// <returns><c>true</c> if the strings are equal (case-insensitive); otherwise, <c>false</c>.</returns>
             public bool EqualsIgnoreCase(string toCompare) =>
                 string.Equals(value, toCompare, StringComparison.OrdinalIgnoreCase);
 
             /// <summary>
             /// Determines whether the string ends with the specified substring using case-insensitive comparison.
             /// </summary>
+            /// <param name="toCompare">The substring to compare.</param>
+            /// <returns><c>true</c> if the string ends with <paramref name="toCompare"/> (case-insensitive); otherwise, <c>false</c>.</returns>
             public bool EndsWithIgnoreCase(string toCompare) =>
                 value?.EndsWith(toCompare, StringComparison.OrdinalIgnoreCase) ?? false;
 
             /// <summary>
             /// Determines whether the string starts with the specified substring using case-insensitive comparison.
             /// </summary>
+            /// <param name="toCompare">The substring to compare.</param>
+            /// <returns><c>true</c> if the string starts with <paramref name="toCompare"/> (case-insensitive); otherwise, <c>false</c>.</returns>
             public bool StartsWithIgnoreCase(string toCompare) =>
                 value?.StartsWith(toCompare, StringComparison.OrdinalIgnoreCase) ?? false;
 
             /// <summary>
             /// Determines whether the string contains the specified substring using case-insensitive comparison.
             /// </summary>
+            /// <param name="toCompare">The substring to search for.</param>
+            /// <returns><c>true</c> if the string contains <paramref name="toCompare"/> (case-insensitive); otherwise, <c>false</c>.</returns>
             public bool ContainsIgnoreCase(string toCompare) =>
                 value is not null && toCompare is not null && value.Contains(toCompare, StringComparison.OrdinalIgnoreCase);
 
             /// <summary>
             /// Trims the string safely, returning an empty string if the input is null or whitespace.
             /// </summary>
+            /// <returns>The trimmed string, or <see cref="string.Empty"/> if the input is null or whitespace.</returns>
             public string SafeTrim() =>
                 string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
 
@@ -92,6 +104,9 @@ namespace Grondo.Extensions
             /// Attempts to parse the string into an enum of type <typeparamref name="TEnum"/>.
             /// Returns the default value if parsing fails.
             /// </summary>
+            /// <typeparam name="TEnum">The enum type to parse into.</typeparam>
+            /// <param name="ignoreCase">Whether to ignore case when parsing. Defaults to <c>true</c>.</param>
+            /// <returns>The parsed enum value, or <c>default</c> if parsing fails.</returns>
             public TEnum ToEnum<TEnum>(bool ignoreCase = true) where TEnum : struct =>
                 Enum.TryParse(value, ignoreCase, out TEnum result) ? result : default;
 
@@ -105,18 +120,24 @@ namespace Grondo.Extensions
             /// <summary>
             /// Determines whether two strings are equal using case-insensitive comparison after trimming whitespace.
             /// </summary>
+            /// <param name="toCompare">The string to compare with.</param>
+            /// <returns><c>true</c> if the trimmed strings are equal (case-insensitive); otherwise, <c>false</c>.</returns>
             public bool EqualsIgnoreCaseWithTrim(string toCompare) =>
                 value.SafeTrim().EqualsIgnoreCase(toCompare.SafeTrim());
 
             /// <summary>
             /// Determines whether two strings are equal after trimming whitespace.
             /// </summary>
+            /// <param name="toCompare">The string to compare with.</param>
+            /// <returns><c>true</c> if the trimmed strings are equal (ordinal); otherwise, <c>false</c>.</returns>
             public bool EqualsWithTrim(string toCompare) =>
                 value.SafeTrim().Equals(toCompare.SafeTrim(), StringComparison.Ordinal);
 
             /// <summary>
             /// Determines whether the string starts with the specified substring using case-insensitive comparison after trimming whitespace.
             /// </summary>
+            /// <param name="toCompare">The substring to compare.</param>
+            /// <returns><c>true</c> if the trimmed string starts with <paramref name="toCompare"/> (case-insensitive); otherwise, <c>false</c>.</returns>
             public bool StartsWithIgnoreCaseWithTrim(string toCompare) =>
                 value.SafeTrim().StartsWithIgnoreCase(toCompare.SafeTrim());
 
@@ -197,6 +218,105 @@ namespace Grondo.Extensions
                 slug = SlugSeparatorRegex().Replace(slug, "-");
                 slug = SlugTrimRegex().Replace(slug, string.Empty);
                 return slug;
+            }
+
+            /// <summary>
+            /// Determines whether the string represents a valid numeric value.
+            /// Supports integers, decimals, and scientific notation.
+            /// </summary>
+            /// <returns><c>true</c> if the string can be parsed as a number; otherwise, <c>false</c>.</returns>
+            public bool IsNumeric() =>
+                !string.IsNullOrWhiteSpace(value) && double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out _);
+
+            /// <summary>
+            /// Determines whether the string represents a valid GUID.
+            /// </summary>
+            /// <returns><c>true</c> if the string can be parsed as a GUID; otherwise, <c>false</c>.</returns>
+            public bool IsGuid() =>
+                !string.IsNullOrWhiteSpace(value) && Guid.TryParse(value, out _);
+
+            /// <summary>
+            /// Converts the string to snake_case (e.g., "MyPropertyName" → "my_property_name").
+            /// Handles PascalCase, camelCase, snake_case, and kebab-case inputs.
+            /// </summary>
+            /// <returns>The string in snake_case.</returns>
+            public string ToSnakeCase()
+            {
+                if (string.IsNullOrEmpty(value)) return value ?? string.Empty;
+                string[] words = [.. WordBoundaryRegex().Split(value).Where(w => !string.IsNullOrEmpty(w))];
+                return string.Join("_", words).ToLowerInvariant();
+            }
+
+            /// <summary>
+            /// Converts the string to kebab-case (e.g., "MyPropertyName" → "my-property-name").
+            /// Handles PascalCase, camelCase, snake_case, and kebab-case inputs.
+            /// </summary>
+            /// <returns>The string in kebab-case.</returns>
+            public string ToKebabCase()
+            {
+                if (string.IsNullOrEmpty(value)) return value ?? string.Empty;
+                string[] words = [.. WordBoundaryRegex().Split(value).Where(w => !string.IsNullOrEmpty(w))];
+                return string.Join("-", words).ToLowerInvariant();
+            }
+
+            /// <summary>
+            /// Converts the string to camelCase (e.g., "MyPropertyName" → "myPropertyName").
+            /// Handles PascalCase, camelCase, snake_case, and kebab-case inputs.
+            /// </summary>
+            /// <returns>The string in camelCase.</returns>
+            public string ToCamelCase()
+            {
+                if (string.IsNullOrEmpty(value)) return value ?? string.Empty;
+                string[] words = [.. WordBoundaryRegex().Split(value).Where(w => !string.IsNullOrEmpty(w))];
+                if (words.Length == 0) return string.Empty;
+
+                var sb = new StringBuilder();
+                sb.Append(words[0].ToLowerInvariant());
+                for (int i = 1; i < words.Length; i++)
+                {
+                    if (words[i].Length > 0)
+                    {
+                        sb.Append(char.ToUpperInvariant(words[i][0]));
+                        sb.Append(words[i][1..].ToLowerInvariant());
+                    }
+                }
+                return sb.ToString();
+            }
+
+            /// <summary>
+            /// Converts the string to a human-readable form by splitting on word boundaries and capitalizing the first letter
+            /// (e.g., "MyPropertyName" → "My Property Name", "some_variable" → "Some variable").
+            /// </summary>
+            /// <returns>The humanized string.</returns>
+            public string Humanize()
+            {
+                if (string.IsNullOrEmpty(value)) return value ?? string.Empty;
+                string[] words = [.. WordBoundaryRegex().Split(value).Where(w => !string.IsNullOrEmpty(w))];
+                if (words.Length == 0) return string.Empty;
+
+                var sb = new StringBuilder();
+                sb.Append(char.ToUpperInvariant(words[0][0]));
+                sb.Append(words[0][1..].ToLowerInvariant());
+                for (int i = 1; i < words.Length; i++)
+                {
+                    sb.Append(' ');
+                    sb.Append(words[i].ToLowerInvariant());
+                }
+                return sb.ToString();
+            }
+
+            /// <summary>
+            /// Returns the string with its characters in reverse order.
+            /// </summary>
+            /// <returns>The reversed string.</returns>
+            public string Reverse()
+            {
+                if (string.IsNullOrEmpty(value)) return value ?? string.Empty;
+                return string.Create(value.Length, value, static (span, str) =>
+                {
+                    str.AsSpan().CopyTo(span);
+                    span.Reverse();
+                });
             }
         }
 

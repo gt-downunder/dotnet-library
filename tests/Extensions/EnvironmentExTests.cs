@@ -65,6 +65,30 @@ namespace Grondo.Tests.Extensions
             var env = new TestHostEnvironment { EnvironmentName = "staging" };
             env.IsUat().Should().BeFalse();
         }
+
+        [TestMethod]
+        public void IsLocal_NullEnv_ThrowsArgumentNullException()
+        {
+            IHostEnvironment env = null!;
+            Action act = () => env.IsLocal();
+            act.Should().Throw<ArgumentNullException>();
+        }
+
+        [TestMethod]
+        public void IsTest_NullEnv_ThrowsArgumentNullException()
+        {
+            IHostEnvironment env = null!;
+            Action act = () => env.IsTest();
+            act.Should().Throw<ArgumentNullException>();
+        }
+
+        [TestMethod]
+        public void IsUat_NullEnv_ThrowsArgumentNullException()
+        {
+            IHostEnvironment env = null!;
+            Action act = () => env.IsUat();
+            act.Should().Throw<ArgumentNullException>();
+        }
     }
 }
 

@@ -19,13 +19,9 @@ namespace Grondo.Extensions
             public async Task<byte[]> ToByteArrayAsync(CancellationToken cancellationToken = default)
             {
                 ArgumentNullException.ThrowIfNull(stream);
+                ResetPosition(stream);
 
-                if (stream.CanSeek)
-                {
-                    stream.Position = 0;
-                }
-
-                await using var memoryStream = new MemoryStream();
+                await using MemoryStream memoryStream = stream.CanSeek ? new MemoryStream((int)stream.Length) : new MemoryStream();
                 await stream.CopyToAsync(memoryStream, cancellationToken).ConfigureAwait(false);
                 return memoryStream.ToArray();
             }
@@ -41,13 +37,9 @@ namespace Grondo.Extensions
             public async Task<string> ToStringAsync(Encoding? encoding = null, CancellationToken cancellationToken = default)
             {
                 ArgumentNullException.ThrowIfNull(stream);
+                ResetPosition(stream);
 
                 encoding ??= Encoding.UTF8;
-
-                if (stream.CanSeek)
-                {
-                    stream.Position = 0;
-                }
 
                 using var reader = new StreamReader(stream, encoding, leaveOpen: true);
                 return await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
@@ -64,16 +56,20 @@ namespace Grondo.Extensions
             public async Task<MemoryStream> ToMemoryStreamAsync(CancellationToken cancellationToken = default)
             {
                 ArgumentNullException.ThrowIfNull(stream);
+                ResetPosition(stream);
 
-                if (stream.CanSeek)
-                {
-                    stream.Position = 0;
-                }
-
-                var memoryStream = new MemoryStream();
+                MemoryStream memoryStream = stream.CanSeek ? new MemoryStream((int)stream.Length) : new MemoryStream();
                 await stream.CopyToAsync(memoryStream, cancellationToken).ConfigureAwait(false);
                 memoryStream.Position = 0;
                 return memoryStream;
+            }
+        }
+
+        private static void ResetPosition(Stream stream)
+        {
+            if (stream.CanSeek)
+            {
+                stream.Position = 0;
             }
         }
     }

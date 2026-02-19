@@ -8,37 +8,25 @@ namespace Grondo.Tests.Extensions
     public class StringExTests : BaseExtensionTest
     {
         [TestMethod]
-        public void IsWellFormedEmail_ShouldReturnTrue_WhenEmailsAreCorrect()
-        {
-            string[] goodEmails =
-            [
-                "david.jones@contoso.com", "d.j@server1.contoso.com",
-                "jones@ms1.contoso.com", "j@contoso.com9",
-                "js#internal@contoso.com", "j_9@[129.126.118.1]",
-                "js@contoso.com9", "j.s@server1.contoso.com",
-                "\"j\\\"s\\\"\"@contoso.com", "js@contoso.中国"
-            ];
-
-            foreach (string emailAddress in goodEmails)
-            {
-                emailAddress.IsWellFormedEmailAddress().Should().BeTrue();
-            }
-        }
+        [DataRow("david.jones@contoso.com")]
+        [DataRow("d.j@server1.contoso.com")]
+        [DataRow("jones@ms1.contoso.com")]
+        [DataRow("j@contoso.com9")]
+        [DataRow("js#internal@contoso.com")]
+        [DataRow("j_9@[129.126.118.1]")]
+        [DataRow("js@contoso.com9")]
+        [DataRow("j.s@server1.contoso.com")]
+        [DataRow("js@contoso.中国")]
+        public void IsWellFormedEmail_ShouldReturnTrue_WhenEmailsAreCorrect(string emailAddress) =>
+            emailAddress.IsWellFormedEmailAddress().Should().BeTrue();
 
         [TestMethod]
-        public void IsWellFormedEmail_ShouldReturnFalse_WhenEmailsAreIncorrect()
-        {
-            string[] badEmails =
-            [
-                "j.@@.contoso.com", "j@..s@contoso.com",
-                "js*@contoso.com.@", "js@contoso.@.com"
-            ];
-
-            foreach (string emailAddress in badEmails)
-            {
-                emailAddress.IsWellFormedEmailAddress().Should().BeFalse();
-            }
-        }
+        [DataRow("j.@@.contoso.com")]
+        [DataRow("j@..s@contoso.com")]
+        [DataRow("js*@contoso.com.@")]
+        [DataRow("js@contoso.@.com")]
+        public void IsWellFormedEmail_ShouldReturnFalse_WhenEmailsAreIncorrect(string emailAddress) =>
+            emailAddress.IsWellFormedEmailAddress().Should().BeFalse();
 
         [TestMethod]
         public void EqualsIgnoreCaseWithTrim_ShouldReturnTrue_WhenStringEndsWithEmptySpace() => "Test Value".EqualsIgnoreCaseWithTrim("test value ").Should().BeTrue();
@@ -169,5 +157,95 @@ namespace Grondo.Tests.Extensions
 
         [TestMethod]
         public void IsNullOrWhiteSpace_HasContent_ReturnsFalse() => "hello".IsNullOrWhiteSpace().Should().BeFalse();
+
+        // --- IsNumeric ---
+
+        [TestMethod]
+        [DataRow("123", true)]
+        [DataRow("-45.67", true)]
+        [DataRow("1.5E2", true)]
+        [DataRow("0", true)]
+        [DataRow("abc", false)]
+        [DataRow("", false)]
+        [DataRow("  ", false)]
+        public void IsNumeric_ReturnsExpected(string input, bool expected) =>
+            input.IsNumeric().Should().Be(expected);
+
+        [TestMethod]
+        public void IsNumeric_Null_ReturnsFalse() =>
+            ((string?)null!).IsNumeric().Should().BeFalse();
+
+        // --- IsGuid ---
+
+        [TestMethod]
+        public void IsGuid_ValidGuid_ReturnsTrue() =>
+            Guid.NewGuid().ToString().IsGuid().Should().BeTrue();
+
+        [TestMethod]
+        [DataRow("not-a-guid")]
+        [DataRow("")]
+        [DataRow("  ")]
+        public void IsGuid_Invalid_ReturnsFalse(string input) =>
+            input.IsGuid().Should().BeFalse();
+
+        [TestMethod]
+        public void IsGuid_Null_ReturnsFalse() =>
+            ((string?)null!).IsGuid().Should().BeFalse();
+
+        // --- ToSnakeCase ---
+
+        [TestMethod]
+        [DataRow("MyPropertyName", "my_property_name")]
+        [DataRow("camelCase", "camel_case")]
+        [DataRow("already_snake", "already_snake")]
+        [DataRow("kebab-case", "kebab_case")]
+        [DataRow("HTMLParser", "html_parser")]
+        [DataRow("", "")]
+        public void ToSnakeCase_ConvertsCorrectly(string input, string expected) =>
+            input.ToSnakeCase().Should().Be(expected);
+
+        // --- ToKebabCase ---
+
+        [TestMethod]
+        [DataRow("MyPropertyName", "my-property-name")]
+        [DataRow("camelCase", "camel-case")]
+        [DataRow("snake_case", "snake-case")]
+        [DataRow("already-kebab", "already-kebab")]
+        [DataRow("", "")]
+        public void ToKebabCase_ConvertsCorrectly(string input, string expected) =>
+            input.ToKebabCase().Should().Be(expected);
+
+        // --- ToCamelCase ---
+
+        [TestMethod]
+        [DataRow("MyPropertyName", "myPropertyName")]
+        [DataRow("already_camel", "alreadyCamel")]
+        [DataRow("kebab-case", "kebabCase")]
+        [DataRow("PascalCase", "pascalCase")]
+        [DataRow("", "")]
+        public void ToCamelCase_ConvertsCorrectly(string input, string expected) =>
+            input.ToCamelCase().Should().Be(expected);
+
+        // --- Humanize ---
+
+        [TestMethod]
+        [DataRow("MyPropertyName", "My property name")]
+        [DataRow("some_variable", "Some variable")]
+        [DataRow("kebab-case", "Kebab case")]
+        [DataRow("camelCase", "Camel case")]
+        [DataRow("", "")]
+        public void Humanize_ConvertsCorrectly(string input, string expected) =>
+            input.Humanize().Should().Be(expected);
+
+        // --- Reverse ---
+
+        [TestMethod]
+        [DataRow("hello", "olleh")]
+        [DataRow("a", "a")]
+        [DataRow("", "")]
+        [DataRow("abba", "abba")]
+        [DataRow("12345", "54321")]
+        public void Reverse_ReversesCorrectly(string input, string expected) =>
+            input.Reverse().Should().Be(expected);
     }
 }

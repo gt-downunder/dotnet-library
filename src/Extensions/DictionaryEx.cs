@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using Grondo.Utilities;
 
 namespace Grondo.Extensions
@@ -50,11 +51,24 @@ namespace Grondo.Extensions
             /// Converts the dictionary into a URL query string.
             /// </summary>
             /// <returns>A query string representation of the dictionary, or an empty string if the dictionary is empty.</returns>
-            public string ToQueryString() =>
-                source.Any()
-                    ? "?" + string.Join("&", source.Select(kv =>
-                        $"{Uri.EscapeDataString(kv.Key?.ToString() ?? string.Empty)}={Uri.EscapeDataString(kv.Value?.ToString() ?? string.Empty)}"))
-                    : string.Empty;
+            public string ToQueryString()
+            {
+                if (!source.Any())
+                    return string.Empty;
+
+                var sb = new StringBuilder("?");
+                bool first = true;
+                foreach (KeyValuePair<TK, TV> kv in source)
+                {
+                    if (!first) sb.Append('&');
+                    first = false;
+                    sb.Append(Uri.EscapeDataString(kv.Key?.ToString() ?? string.Empty));
+                    sb.Append('=');
+                    sb.Append(Uri.EscapeDataString(kv.Value?.ToString() ?? string.Empty));
+                }
+
+                return sb.ToString();
+            }
 
             /// <summary>
             /// Returns a string representation of the dictionary in a debug-friendly format.
