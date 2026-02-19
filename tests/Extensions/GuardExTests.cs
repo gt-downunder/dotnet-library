@@ -10,16 +10,14 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ThrowIfNull_NonNull_ReturnsValue()
         {
-            string value = "hello";
-            value.ThrowIfNull("param").Should().Be("hello");
+            "hello".ThrowIfNull("param").Should().Be("hello");
         }
 
         [TestMethod]
         public void ThrowIfNull_Null_ThrowsArgumentNullException()
         {
-            string? value = null;
-            Func<string> act = () => value.ThrowIfNull("myParam");
-            act.Should().Throw<ArgumentNullException>().WithParameterName("myParam");
+            FluentActions.Invoking(() => default(string).ThrowIfNull("myParam"))
+                .Should().Throw<ArgumentNullException>().WithParameterName("myParam");
         }
 
         [TestMethod]
@@ -28,23 +26,22 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ThrowIfNullOrWhiteSpace_Null_ThrowsArgumentNullException()
         {
-            string? value = null;
-            Func<string> act = () => value.ThrowIfNullOrWhiteSpace("p");
-            act.Should().Throw<ArgumentNullException>();
+            FluentActions.Invoking(() => default(string).ThrowIfNullOrWhiteSpace("p"))
+                .Should().Throw<ArgumentNullException>();
         }
 
         [TestMethod]
         public void ThrowIfNullOrWhiteSpace_Whitespace_ThrowsArgumentException()
         {
-            Func<string> act = () => "  ".ThrowIfNullOrWhiteSpace("p");
-            act.Should().Throw<ArgumentException>().WithParameterName("p");
+            FluentActions.Invoking(() => "  ".ThrowIfNullOrWhiteSpace("p"))
+                .Should().Throw<ArgumentException>().WithParameterName("p");
         }
 
         [TestMethod]
         public void ThrowIfNullOrWhiteSpace_Empty_ThrowsArgumentException()
         {
-            Func<string> act = () => "".ThrowIfNullOrWhiteSpace("p");
-            act.Should().Throw<ArgumentException>();
+            FluentActions.Invoking(() => "".ThrowIfNullOrWhiteSpace("p"))
+                .Should().Throw<ArgumentException>();
         }
 
         [TestMethod]
@@ -53,8 +50,8 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ThrowIfDefault_DefaultInt_ThrowsArgumentException()
         {
-            Func<int> act = () => 0.ThrowIfDefault("p");
-            act.Should().Throw<ArgumentException>().WithParameterName("p");
+            FluentActions.Invoking(() => 0.ThrowIfDefault("p"))
+                .Should().Throw<ArgumentException>().WithParameterName("p");
         }
 
         [TestMethod]
@@ -67,23 +64,21 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ThrowIfEmpty_NonEmptyCollection_ReturnsCollection()
         {
-            int[] items = [1, 2, 3];
-            items.ThrowIfEmpty("items").Should().BeEquivalentTo([1, 2, 3]);
+            new[] { 1, 2, 3 }.ThrowIfEmpty("items").Should().BeEquivalentTo([1, 2, 3]);
         }
 
         [TestMethod]
         public void ThrowIfEmpty_NullCollection_ThrowsArgumentNullException()
         {
-            IEnumerable<int>? items = null;
-            Func<IEnumerable<int>> act = () => items.ThrowIfEmpty("items");
-            act.Should().Throw<ArgumentNullException>();
+            FluentActions.Invoking(() => default(IEnumerable<int>).ThrowIfEmpty("items"))
+                .Should().Throw<ArgumentNullException>();
         }
 
         [TestMethod]
         public void ThrowIfEmpty_EmptyCollection_ThrowsArgumentException()
         {
-            Func<IEnumerable<int>> act = () => Array.Empty<int>().ThrowIfEmpty("items");
-            act.Should().Throw<ArgumentException>().WithParameterName("items");
+            FluentActions.Invoking(() => Array.Empty<int>().ThrowIfEmpty("items"))
+                .Should().Throw<ArgumentException>().WithParameterName("items");
         }
 
         // --- Numeric Guards ---
@@ -97,15 +92,15 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ThrowIfNegative_NegativeValue_ThrowsArgumentOutOfRangeException()
         {
-            Func<int> act = () => (-1).ThrowIfNegative("n");
-            act.Should().Throw<ArgumentOutOfRangeException>().WithParameterName("n");
+            FluentActions.Invoking(() => (-1).ThrowIfNegative("n"))
+                .Should().Throw<ArgumentOutOfRangeException>().WithParameterName("n");
         }
 
         [TestMethod]
         public void ThrowIfNegative_DoubleNegative_Throws()
         {
-            Func<double> act = () => (-0.5).ThrowIfNegative("d");
-            act.Should().Throw<ArgumentOutOfRangeException>();
+            FluentActions.Invoking(() => (-0.5).ThrowIfNegative("d"))
+                .Should().Throw<ArgumentOutOfRangeException>();
         }
 
         [TestMethod]
@@ -114,15 +109,15 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ThrowIfNegativeOrZero_Zero_Throws()
         {
-            Func<int> act = () => 0.ThrowIfNegativeOrZero("n");
-            act.Should().Throw<ArgumentOutOfRangeException>().WithParameterName("n");
+            FluentActions.Invoking(() => 0.ThrowIfNegativeOrZero("n"))
+                .Should().Throw<ArgumentOutOfRangeException>().WithParameterName("n");
         }
 
         [TestMethod]
         public void ThrowIfNegativeOrZero_Negative_Throws()
         {
-            Func<int> act = () => (-5).ThrowIfNegativeOrZero("n");
-            act.Should().Throw<ArgumentOutOfRangeException>();
+            FluentActions.Invoking(() => (-5).ThrowIfNegativeOrZero("n"))
+                .Should().Throw<ArgumentOutOfRangeException>();
         }
 
         [TestMethod]
@@ -131,8 +126,8 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ThrowIfZero_Zero_Throws()
         {
-            Func<int> act = () => 0.ThrowIfZero("n");
-            act.Should().Throw<ArgumentOutOfRangeException>().WithParameterName("n");
+            FluentActions.Invoking(() => 0.ThrowIfZero("n"))
+                .Should().Throw<ArgumentOutOfRangeException>().WithParameterName("n");
         }
 
         [TestMethod]
@@ -150,15 +145,15 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ThrowIfOutOfRange_BelowMin_Throws()
         {
-            Func<int> act = () => 0.ThrowIfOutOfRange(1, 10, "n");
-            act.Should().Throw<ArgumentOutOfRangeException>().WithParameterName("n");
+            FluentActions.Invoking(() => 0.ThrowIfOutOfRange(1, 10, "n"))
+                .Should().Throw<ArgumentOutOfRangeException>().WithParameterName("n");
         }
 
         [TestMethod]
         public void ThrowIfOutOfRange_AboveMax_Throws()
         {
-            Func<int> act = () => 11.ThrowIfOutOfRange(1, 10, "n");
-            act.Should().Throw<ArgumentOutOfRangeException>().WithParameterName("n");
+            FluentActions.Invoking(() => 11.ThrowIfOutOfRange(1, 10, "n"))
+                .Should().Throw<ArgumentOutOfRangeException>().WithParameterName("n");
         }
 
         // --- Predicate Guard ---
@@ -170,16 +165,16 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ThrowIf_PredicateTrue_ThrowsArgumentException()
         {
-            Func<int> act = () => 150.ThrowIf(x => x > 100, "Too large", "n");
-            act.Should().Throw<ArgumentException>().WithParameterName("n")
+            FluentActions.Invoking(() => 150.ThrowIf(x => x > 100, "Too large", "n"))
+                .Should().Throw<ArgumentException>().WithParameterName("n")
                 .WithMessage("Too large*");
         }
 
         [TestMethod]
         public void ThrowIf_NullPredicate_ThrowsArgumentNullException()
         {
-            Func<int> act = () => 42.ThrowIf(null!, "msg", "n");
-            act.Should().Throw<ArgumentNullException>();
+            FluentActions.Invoking(() => 42.ThrowIf(null!, "msg", "n"))
+                .Should().Throw<ArgumentNullException>();
         }
 
         // --- Regex Format Guard ---
@@ -191,17 +186,15 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ThrowIfInvalidFormat_InvalidFormat_ThrowsArgumentException()
         {
-            Func<string> act = () => "invalid".ThrowIfInvalidFormat(@"^\d+$", "num");
-            act.Should().Throw<ArgumentException>().WithParameterName("num");
+            FluentActions.Invoking(() => "invalid".ThrowIfInvalidFormat(@"^\d+$", "num"))
+                .Should().Throw<ArgumentException>().WithParameterName("num");
         }
 
         [TestMethod]
         public void ThrowIfInvalidFormat_NullValue_ThrowsArgumentNullException()
         {
-            string? value = null;
-            Func<string> act = () => value.ThrowIfInvalidFormat(@"\d+", "p");
-            act.Should().Throw<ArgumentNullException>();
+            FluentActions.Invoking(() => default(string).ThrowIfInvalidFormat(@"\d+", "p"))
+                .Should().Throw<ArgumentNullException>();
         }
     }
 }
-

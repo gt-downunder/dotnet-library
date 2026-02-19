@@ -61,7 +61,7 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void UseScoped_NullAction_ThrowsArgumentNullException()
         {
-            Action act = () => ServiceProvider.UseScoped<ILoggerFactory>((Action<ILoggerFactory>)null!);
+            Action act = () => ServiceProvider.UseScoped<ILoggerFactory>(default(Action<ILoggerFactory>)!);
             act.Should().Throw<ArgumentNullException>();
         }
     }

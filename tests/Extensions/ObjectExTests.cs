@@ -14,49 +14,43 @@ namespace Grondo.Tests.Extensions
         public void IsNumeric_DoubleValue_ReturnsTrue() => ((object)3.14).IsNumeric().Should().BeTrue();
 
         [TestMethod]
-        public void IsNumeric_NumericString_ReturnsTrue() => ((object)"123.45").IsNumeric().Should().BeTrue();
+        public void IsNumeric_NumericString_ReturnsTrue() { object value = "123.45"; value.IsNumeric().Should().BeTrue(); }
 
         [TestMethod]
-        public void IsNumeric_NonNumericString_ReturnsFalse() => ((object)"hello").IsNumeric().Should().BeFalse();
+        public void IsNumeric_NonNumericString_ReturnsFalse() { object value = "hello"; value.IsNumeric().Should().BeFalse(); }
 
         [TestMethod]
-        public void IsNumeric_Null_ReturnsFalse() => ((object?)null).IsNumeric().Should().BeFalse();
+        public void IsNumeric_Null_ReturnsFalse() => default(object?).IsNumeric().Should().BeFalse();
 
         [TestMethod]
         public void IsNumeric_BoolValue_ReturnsFalse() => ((object)true).IsNumeric().Should().BeFalse();
 
         [TestMethod]
-        public void ToNullableDouble_ValidString_ReturnsValue() =>
-            ((object)"3.14").ToNullableDouble().Should().BeApproximately(3.14, 0.001);
+        public void ToNullableDouble_ValidString_ReturnsValue() { object value = "3.14"; value.ToNullableDouble().Should().BeApproximately(3.14, 0.001); }
 
         [TestMethod]
-        public void ToNullableDouble_Invalid_ReturnsNull() =>
-            ((object)"abc").ToNullableDouble().Should().BeNull();
+        public void ToNullableDouble_Invalid_ReturnsNull() { object value = "abc"; value.ToNullableDouble().Should().BeNull(); }
 
         [TestMethod]
-        public void ToNullableDouble_Null_ReturnsNull() =>
-            ((object?)null).ToNullableDouble().Should().BeNull();
+        public void ToNullableDouble_Null_ReturnsNull() => default(object?).ToNullableDouble().Should().BeNull();
 
         [TestMethod]
-        public void ToNullableInteger_ValidString_ReturnsValue() =>
-            ((object)"42").ToNullableInteger().Should().Be(42);
+        public void ToNullableInteger_ValidString_ReturnsValue() { object value = "42"; value.ToNullableInteger().Should().Be(42); }
 
         [TestMethod]
-        public void ToNullableInteger_Invalid_ReturnsNull() =>
-            ((object)"xyz").ToNullableInteger().Should().BeNull();
+        public void ToNullableInteger_Invalid_ReturnsNull() { object value = "xyz"; value.ToNullableInteger().Should().BeNull(); }
 
         [TestMethod]
-        public void ToNullableBoolean_TrueString_ReturnsTrue() =>
-            ((object)"true").ToNullableBoolean().Should().BeTrue();
+        public void ToNullableBoolean_TrueString_ReturnsTrue() { object value = "true"; value.ToNullableBoolean().Should().BeTrue(); }
 
         [TestMethod]
-        public void ToNullableBoolean_Invalid_ReturnsNull() =>
-            ((object)"maybe").ToNullableBoolean().Should().BeNull();
+        public void ToNullableBoolean_Invalid_ReturnsNull() { object value = "maybe"; value.ToNullableBoolean().Should().BeNull(); }
 
         [TestMethod]
         public void ToNullableDateTime_ValidDate_ReturnsValue()
         {
-            DateTime? result = ((object)"2024-01-15").ToNullableDateTime();
+            object value = "2024-01-15";
+            var result = value.ToNullableDateTime();
             result.Should().NotBeNull();
             result!.Value.Year.Should().Be(2024);
         }
@@ -64,14 +58,14 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ToNullableDateTime_WithFormat_ReturnsValue()
         {
-            DateTime? result = ((object)"15/01/2024").ToNullableDateTime("dd/MM/yyyy");
+            object value = "15/01/2024";
+            var result = value.ToNullableDateTime("dd/MM/yyyy");
             result.Should().NotBeNull();
             result!.Value.Day.Should().Be(15);
         }
 
         [TestMethod]
-        public void ToNullableDateTime_Invalid_ReturnsNull() =>
-            ((object)"not-a-date").ToNullableDateTime().Should().BeNull();
+        public void ToNullableDateTime_Invalid_ReturnsNull() { object value = "not-a-date"; value.ToNullableDateTime().Should().BeNull(); }
 
         [TestMethod]
         public void ToStringContent_StringObject_CreatesContent()
@@ -96,8 +90,7 @@ namespace Grondo.Tests.Extensions
         public void Pipe_ExecutesSideEffect_ReturnsOriginal()
         {
             int sideEffect = 0;
-            int result = 42.Pipe(x => sideEffect = x);
-            result.Should().Be(42);
+            42.Pipe(x => sideEffect = x).Should().Be(42);
             sideEffect.Should().Be(42);
         }
 
@@ -105,16 +98,15 @@ namespace Grondo.Tests.Extensions
         public void Pipe_InFluentChain_MaintainsFlow()
         {
             string? captured = null;
-            string result = "hello".Pipe(s => captured = s).ToUpper();
-            result.Should().Be("HELLO");
+            "hello".Pipe(s => captured = s).ToUpper().Should().Be("HELLO");
             captured.Should().Be("hello");
         }
 
         [TestMethod]
         public void Pipe_NullAction_ThrowsArgumentNullException()
         {
-            Action act = () => 42.Pipe((Action<int>)null!);
-            act.Should().Throw<ArgumentNullException>();
+            FluentActions.Invoking(() => 42.Pipe(default(Action<int>)!))
+                .Should().Throw<ArgumentNullException>();
         }
     }
 }

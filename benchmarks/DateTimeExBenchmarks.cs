@@ -27,10 +27,10 @@ namespace Grondo.Benchmarks
         public string ToFormattedDateTime() => _nullableDateTime.ToFormattedDateTime();
 
         [Benchmark]
-        public DateTime? FromFormattedDate() => ((DateTime?)_formattedDate.FromFormattedDate());
+        public DateTime? FromFormattedDate() => _formattedDate.FromFormattedDate();
 
         [Benchmark]
-        public DateTime? FromFormattedDateTime() => ((DateTime?)_formattedDateTime.FromFormattedDateTime());
+        public DateTime? FromFormattedDateTime() => _formattedDateTime.FromFormattedDateTime();
 
         [Benchmark]
         public DateTime StartOfDay() => _dateTime.StartOfDay();

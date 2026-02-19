@@ -147,7 +147,7 @@ namespace Grondo.Tests.Extensions
         // --- IsNullOrWhiteSpace ---
 
         [TestMethod]
-        public void IsNullOrWhiteSpace_Null_ReturnsTrue() => ((string?)null).IsNullOrWhiteSpace().Should().BeTrue();
+        public void IsNullOrWhiteSpace_Null_ReturnsTrue() => default(string).IsNullOrWhiteSpace().Should().BeTrue();
 
         [TestMethod]
         public void IsNullOrWhiteSpace_Empty_ReturnsTrue() => "".IsNullOrWhiteSpace().Should().BeTrue();
@@ -173,7 +173,7 @@ namespace Grondo.Tests.Extensions
 
         [TestMethod]
         public void IsNumeric_Null_ReturnsFalse() =>
-            ((string?)null!).IsNumeric().Should().BeFalse();
+            default(string)!.IsNumeric().Should().BeFalse();
 
         // --- IsGuid ---
 
@@ -190,7 +190,7 @@ namespace Grondo.Tests.Extensions
 
         [TestMethod]
         public void IsGuid_Null_ReturnsFalse() =>
-            ((string?)null!).IsGuid().Should().BeFalse();
+            default(string)!.IsGuid().Should().BeFalse();
 
         // --- ToSnakeCase ---
 

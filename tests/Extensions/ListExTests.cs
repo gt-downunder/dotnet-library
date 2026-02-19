@@ -223,11 +223,8 @@ namespace Grondo.Tests.Extensions
             const string TestValue = "Hello world";
             var list = new List<string> { { TestValue } };
 
-            // Act
-            bool result = list.ContainsIgnoreCase(TestValue);
-
             // Assert
-            result.Should().BeTrue();
+            list.ContainsIgnoreCase(TestValue).Should().BeTrue();
         }
 
         [TestMethod]
@@ -239,11 +236,8 @@ namespace Grondo.Tests.Extensions
             // Arrange
             var list = new List<string> { { "Hello world" } };
 
-            // Act
-            bool result = list.ContainsIgnoreCase(testValue.ToLower());
-
             // Assert
-            result.Should().BeTrue();
+            list.ContainsIgnoreCase(testValue.ToLower()).Should().BeTrue();
         }
 
         [TestMethod]
@@ -255,11 +249,8 @@ namespace Grondo.Tests.Extensions
             // Arrange
             var list = new List<string> { { "Hello world" } };
 
-            // Act
-            bool result = list.ContainsIgnoreCase(testValue.ToLower());
-
             // Assert
-            result.Should().BeFalse();
+            list.ContainsIgnoreCase(testValue.ToLower()).Should().BeFalse();
         }
 
         [TestMethod]
@@ -276,11 +267,8 @@ namespace Grondo.Tests.Extensions
                 list.Add(RandomFactory.GetAlphanumericString(100));
             }
 
-            // Act
-            bool result = list.ContainsIgnoreCase(testValue.ToLower());
-
             // Assert
-            result.Should().BeTrue();
+            list.ContainsIgnoreCase(testValue.ToLower()).Should().BeTrue();
         }
 
         [TestMethod]
@@ -295,11 +283,8 @@ namespace Grondo.Tests.Extensions
                 list.Add(RandomFactory.GetAlphanumericString(100));
             }
 
-            // Act
-            bool result = list.ContainsIgnoreCase(testValue.ToLower());
-
             // Assert
-            result.Should().BeTrue();
+            list.ContainsIgnoreCase(testValue.ToLower()).Should().BeTrue();
         }
     }
 }

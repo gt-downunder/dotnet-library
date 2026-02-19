@@ -537,14 +537,12 @@ namespace Grondo.Tests
         [TestMethod]
         public void Combine_Collection_MultipleFailures_ReturnsFirstError()
         {
-            Result<int>[] results = new[]
+            var combined = ResultEx.Combine(new[]
             {
                 Result<int>.Success(1),
                 Result<int>.Failure("second failed"),
                 Result<int>.Failure("third failed")
-            };
-
-            Result<IReadOnlyList<int>> combined = ResultEx.Combine(results);
+            });
 
             combined.IsFailure.Should().BeTrue();
             combined.Error.Should().Be("second failed");
@@ -690,10 +688,7 @@ namespace Grondo.Tests
         [TestMethod]
         public void Combine_TwoSuccesses_ReturnsTuple()
         {
-            var first = Result<int>.Success(1);
-            var second = Result<string>.Success("two");
-
-            Result<(int, string)> combined = ResultEx.Combine(first, second);
+            var combined = ResultEx.Combine(Result<int>.Success(1), Result<string>.Success("two"));
 
             combined.IsSuccess.Should().BeTrue();
             combined.Value.Should().Be((1, "two"));

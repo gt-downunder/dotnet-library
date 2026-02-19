@@ -10,9 +10,9 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public async Task LockAsync_AcquiresAndReleases()
         {
-            var semaphore = new SemaphoreSlim(1, 1);
+            using var semaphore = new SemaphoreSlim(1, 1);
 
-            await using (IAsyncDisposable _ = await semaphore.LockAsync(TestContext.CancellationToken))
+            await using (await semaphore.LockAsync(TestContext.CancellationToken))
             {
                 semaphore.CurrentCount.Should().Be(0);
             }
@@ -23,7 +23,7 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public async Task LockAsync_PreventsConurrentAccess()
         {
-            var semaphore = new SemaphoreSlim(1, 1);
+            using var semaphore = new SemaphoreSlim(1, 1);
             int counter = 0;
             var tasks = new List<Task>();
 
@@ -45,7 +45,7 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public async Task LockAsync_SupportsCancellation()
         {
-            var semaphore = new SemaphoreSlim(0, 1); // starts locked
+            using var semaphore = new SemaphoreSlim(0, 1); // starts locked
             using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(50));
 
             Func<Task> act = async () => await semaphore.LockAsync(cts.Token);

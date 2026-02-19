@@ -10,8 +10,7 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public async Task WithTimeout_Generic_CompletesBeforeTimeout_ReturnsResult()
         {
-            int result = await Task.FromResult(42).WithTimeoutAsync(TimeSpan.FromSeconds(5), TestContext.CancellationToken);
-            result.Should().Be(42);
+            (await Task.FromResult(42).WithTimeoutAsync(TimeSpan.FromSeconds(5), TestContext.CancellationToken)).Should().Be(42);
         }
 
         [TestMethod]
@@ -41,10 +40,8 @@ namespace Grondo.Tests.Extensions
         {
             bool handlerCalled = false;
 
-            int result = await Task.FromResult(42)
-                .OnFailureAsync(_ => handlerCalled = true);
-
-            result.Should().Be(42);
+            (await Task.FromResult(42)
+                .OnFailureAsync(_ => handlerCalled = true)).Should().Be(42);
             handlerCalled.Should().BeFalse();
         }
 
@@ -53,10 +50,9 @@ namespace Grondo.Tests.Extensions
         {
             Exception? caught = null;
 
-            Func<Task<int>> act = async () => await Task.FromException<int>(new InvalidOperationException("fail"))
-                .OnFailureAsync(ex => caught = ex);
-
-            await act.Should().ThrowAsync<InvalidOperationException>();
+            await FluentActions.Awaiting(async () => await Task.FromException<int>(new InvalidOperationException("fail"))
+                .OnFailureAsync(ex => caught = ex))
+                .Should().ThrowAsync<InvalidOperationException>();
             caught.Should().NotBeNull();
             caught!.Message.Should().Be("fail");
         }
@@ -66,10 +62,9 @@ namespace Grondo.Tests.Extensions
         {
             Exception? caught = null;
 
-            Func<Task> act = async () => await Task.FromException(new InvalidOperationException("fail"))
-                .OnFailureAsync(ex => caught = ex);
-
-            await act.Should().ThrowAsync<InvalidOperationException>();
+            await FluentActions.Awaiting(async () => await Task.FromException(new InvalidOperationException("fail"))
+                .OnFailureAsync(ex => caught = ex))
+                .Should().ThrowAsync<InvalidOperationException>();
             caught.Should().NotBeNull();
         }
 
@@ -90,13 +85,11 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public async Task WhenAllSequential_Generic_CollectsResults()
         {
-            int[] results = await TaskEx.WhenAllSequentialAsync<int>(
+            (await TaskEx.WhenAllSequentialAsync<int>(
                 () => Task.FromResult(10),
                 () => Task.FromResult(20),
                 () => Task.FromResult(30)
-            );
-
-            results.Should().BeEquivalentTo([10, 20, 30]);
+            )).Should().BeEquivalentTo([10, 20, 30]);
         }
 
         // --- RetryAsync<T> ---
@@ -104,22 +97,19 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public async Task RetryAsync_Generic_SucceedsFirstTry_ReturnsResult()
         {
-            int result = await TaskEx.RetryAsync(() => Task.FromResult(42), maxRetries: 3, delay: TimeSpan.FromMilliseconds(1));
-            result.Should().Be(42);
+            (await TaskEx.RetryAsync(() => Task.FromResult(42), maxRetries: 3, delay: TimeSpan.FromMilliseconds(1))).Should().Be(42);
         }
 
         [TestMethod]
         public async Task RetryAsync_Generic_FailsThenSucceeds_Retries()
         {
             int attempt = 0;
-            int result = await TaskEx.RetryAsync(() =>
+            (await TaskEx.RetryAsync(() =>
             {
                 attempt++;
                 if (attempt < 3) throw new InvalidOperationException("fail");
                 return Task.FromResult(42);
-            }, maxRetries: 3, delay: TimeSpan.FromMilliseconds(1));
-
-            result.Should().Be(42);
+            }, maxRetries: 3, delay: TimeSpan.FromMilliseconds(1))).Should().Be(42);
             attempt.Should().Be(3);
         }
 
@@ -190,25 +180,22 @@ namespace Grondo.Tests.Extensions
         public async Task RetryAsync_Generic_WithFilter_RetriesOnMatchingException()
         {
             int attempt = 0;
-            int result = await TaskEx.RetryAsync(() =>
+            (await TaskEx.RetryAsync(() =>
             {
                 attempt++;
                 if (attempt < 3) throw new InvalidOperationException("fail");
                 return Task.FromResult(42);
-            }, maxRetries: 3, delay: TimeSpan.FromMilliseconds(1), exceptionFilter: ex => ex is InvalidOperationException);
-
-            result.Should().Be(42);
+            }, maxRetries: 3, delay: TimeSpan.FromMilliseconds(1), exceptionFilter: ex => ex is InvalidOperationException)).Should().Be(42);
             attempt.Should().Be(3);
         }
 
         [TestMethod]
         public async Task RetryAsync_Generic_WithFilter_DoesNotRetryOnNonMatchingException()
         {
-            Func<Task> act = async () => await TaskEx.RetryAsync<int>(() =>
+            await FluentActions.Awaiting(async () => await TaskEx.RetryAsync<int>(() =>
                 throw new ArgumentException("wrong type"),
-                maxRetries: 3, delay: TimeSpan.FromMilliseconds(1), exceptionFilter: ex => ex is InvalidOperationException);
-
-            await act.Should().ThrowAsync<ArgumentException>();
+                maxRetries: 3, delay: TimeSpan.FromMilliseconds(1), exceptionFilter: ex => ex is InvalidOperationException))
+                .Should().ThrowAsync<ArgumentException>();
         }
 
         [TestMethod]

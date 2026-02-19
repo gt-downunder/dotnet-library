@@ -13,9 +13,7 @@ namespace Grondo.Tests.Extensions
         public void ToJson_Object_ReturnsJsonString()
         {
             var dto = new TestDto("Test", 42);
-            string json = dto.ToJson();
-
-            json.Should().Contain("\"Name\"").And.Contain("\"Value\"");
+            dto.ToJson().Should().Contain("\"Name\"").And.Contain("\"Value\"");
         }
 
         [TestMethod]
@@ -51,18 +49,14 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void FromJson_NullJson_ThrowsArgumentNullException()
         {
-            string json = null!;
-            Func<TestDto?> act = () => json.FromJson<TestDto>();
-            act.Should().Throw<ArgumentNullException>();
+            FluentActions.Invoking(() => default(string)!.FromJson<TestDto>())
+                .Should().Throw<ArgumentNullException>();
         }
 
         [TestMethod]
         public void TryFromJson_ValidJson_ReturnsTrueAndResult()
         {
-            string json = "{\"Name\":\"Test\",\"Value\":1}";
-            bool success = json.TryFromJson<TestDto>(out TestDto? result);
-
-            success.Should().BeTrue();
+            "{\"Name\":\"Test\",\"Value\":1}".TryFromJson<TestDto>(out TestDto? result).Should().BeTrue();
             result.Should().NotBeNull();
             result!.Name.Should().Be("Test");
         }
@@ -70,18 +64,14 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void TryFromJson_InvalidJson_ReturnsFalse()
         {
-            bool success = "not-json".TryFromJson<TestDto>(out TestDto? result);
-
-            success.Should().BeFalse();
+            "not-json".TryFromJson<TestDto>(out TestDto? result).Should().BeFalse();
             result.Should().BeNull();
         }
 
         [TestMethod]
         public void TryFromJson_NullOrWhitespace_ReturnsFalse()
         {
-            bool success = "".TryFromJson<TestDto>(out TestDto? result);
-
-            success.Should().BeFalse();
+            "".TryFromJson<TestDto>(out TestDto? result).Should().BeFalse();
             result.Should().BeNull();
         }
 
@@ -89,10 +79,7 @@ namespace Grondo.Tests.Extensions
         public void RoundTrip_SerializeAndDeserialize_PreservesData()
         {
             var original = new TestDto("RoundTrip", 123);
-            string json = original.ToJson();
-            TestDto? deserialized = json.FromJson<TestDto>();
-
-            deserialized.Should().Be(original);
+            original.ToJson().FromJson<TestDto>().Should().Be(original);
         }
     }
 }

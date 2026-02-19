@@ -15,7 +15,7 @@ namespace Grondo.Tests.Extensions
         public async Task EnsureObject_CaseInsensitiveFalse_NullProperites()
         {
             // Arrange
-            var response = new HttpResponseMessage
+            using var response = new HttpResponseMessage
             {
                 Content = new StringContent(
                     JsonSerializer.Serialize(new TestDto
@@ -44,7 +44,7 @@ namespace Grondo.Tests.Extensions
                 Name = "Hello World",
                 Id = 1
             };
-            var response = new HttpResponseMessage
+            using var response = new HttpResponseMessage
             { Content = new StringContent(JsonSerializer.Serialize(dto)), StatusCode = HttpStatusCode.OK };
 
             // Act
@@ -67,7 +67,7 @@ namespace Grondo.Tests.Extensions
         public async Task EnsureObject_NonSuccessStatusCode_ThrowsHttpRequestException(HttpStatusCode statusCode)
         {
             // Arrange
-            var response = new HttpResponseMessage { Content = new StringContent(""), StatusCode = statusCode };
+            using var response = new HttpResponseMessage { Content = new StringContent(""), StatusCode = statusCode };
 
             // Act
 
@@ -79,7 +79,7 @@ namespace Grondo.Tests.Extensions
         public async Task EnsureObject_EmptyResponseContent_ThrowsHttpRequestException()
         {
             // Arrange
-            var response = new HttpResponseMessage { Content = new StringContent(""), StatusCode = HttpStatusCode.OK };
+            using var response = new HttpResponseMessage { Content = new StringContent(""), StatusCode = HttpStatusCode.OK };
 
             // Act
 

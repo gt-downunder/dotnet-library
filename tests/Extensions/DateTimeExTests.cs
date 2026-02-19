@@ -10,7 +10,7 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ToFormattedDate_NullDateTime_ReturnsEmptyString()
         {
-            string result = ((DateTime?)null).ToFormattedDate();
+            string result = default(DateTime?).ToFormattedDate();
 
             result.Should().Be(string.Empty);
         }
@@ -28,7 +28,7 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ToFormattedDateTime_NullDateTime_ReturnsEmptyString()
         {
-            string result = ((DateTime?)null).ToFormattedDateTime();
+            string result = default(DateTime?).ToFormattedDateTime();
 
             result.Should().Be(string.Empty);
         }

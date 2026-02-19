@@ -8,11 +8,8 @@ namespace Grondo.Tests.Extensions
     public class EnumerableExTests : BaseExtensionTest
     {
         [TestMethod]
-        public void IsNullOrEmpty_Null_ReturnsTrue()
-        {
-            IEnumerable<int>? source = null;
-            source.IsNullOrEmpty().Should().BeTrue();
-        }
+        public void IsNullOrEmpty_Null_ReturnsTrue() =>
+            default(IEnumerable<int>).IsNullOrEmpty().Should().BeTrue();
 
         [TestMethod]
         public void IsNullOrEmpty_Empty_ReturnsTrue() =>
@@ -23,11 +20,8 @@ namespace Grondo.Tests.Extensions
             new[] { 1 }.IsNullOrEmpty().Should().BeFalse();
 
         [TestMethod]
-        public void IsNotNullOrEmpty_Null_ReturnsFalse()
-        {
-            IEnumerable<int>? source = null;
-            source.IsNotNullOrEmpty().Should().BeFalse();
-        }
+        public void IsNotNullOrEmpty_Null_ReturnsFalse() =>
+            default(IEnumerable<int>).IsNotNullOrEmpty().Should().BeFalse();
 
         [TestMethod]
         public void IsNotNullOrEmpty_HasItems_ReturnsTrue() =>

@@ -10,10 +10,8 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void HasAnyKey_ShouldReturnTrue_WhenKeyIsInDictionary()
         {
-            var tinyDictionary = new Dictionary<string, object>() { { "one", 1 } };
-
-            tinyDictionary.HasAnyKey(["one"]).Should().BeTrue();
-            tinyDictionary.HasAnyKey(["one", "two"]).Should().BeTrue();
+            new Dictionary<string, object>() { { "one", 1 } }.HasAnyKey(["one"]).Should().BeTrue();
+            new Dictionary<string, object>() { { "one", 1 } }.HasAnyKey(["one", "two"]).Should().BeTrue();
 
             const int Size = 10000;
             Dictionary<string, object> hugeDictionary = GetRandomStringObjectDictionary(Size);
@@ -31,9 +29,7 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void HasAnyKey_ShouldReturnFalse_WhenKeyIsNotInDictionary()
         {
-            var dict = new Dictionary<string, object> { { "one", 1 } };
-
-            dict.HasAnyKey(["two", "three", "four"]).Should().BeFalse();
+            new Dictionary<string, object> { { "one", 1 } }.HasAnyKey(["two", "three", "four"]).Should().BeFalse();
         }
 
         [TestMethod]
@@ -41,9 +37,7 @@ namespace Grondo.Tests.Extensions
         {
             Dictionary<string, object> dict = GetRandomStringObjectDictionary(10);
 
-            bool result = dict.HasAnyKey([null!]);
-
-            result.Should().BeFalse();
+            dict.HasAnyKey([null!]).Should().BeFalse();
         }
 
         [TestMethod]
@@ -51,17 +45,13 @@ namespace Grondo.Tests.Extensions
         {
             Dictionary<string, object> dict = GetRandomStringObjectDictionary(10);
 
-            bool result = dict.HasAnyKey(null);
-
-            result.Should().BeFalse();
+            dict.HasAnyKey(null).Should().BeFalse();
         }
 
         [TestMethod]
         public void TryGetValue_ShouldReturnValue_WhenKeyIsInDictionary()
         {
-            var tinyDictionary = new Dictionary<string, object>() { { "one", 1 } };
-
-            tinyDictionary.TryGetValue("one", out object? tinyValue).Should().BeTrue();
+            new Dictionary<string, object>() { { "one", 1 } }.TryGetValue("one", out object? tinyValue).Should().BeTrue();
             tinyValue.Should().Be(1);
 
             const int Size = 10000;
@@ -69,22 +59,20 @@ namespace Grondo.Tests.Extensions
 
             for (int i = 0; i < 10; i++)
             {
-                int idx = RandomFactory.GetInteger(0, Size);
-                string key = hugeDictionary.ElementAt(idx).Key;
-                object value = hugeDictionary.ElementAt(idx).Value;
+                var entry = hugeDictionary.ElementAt(RandomFactory.GetInteger(0, Size));
 
-                hugeDictionary.TryGetValue(key, out object? actual).Should().BeTrue();
-                actual.Should().Be(value);
+                hugeDictionary.TryGetValue(entry.Key, out object? actual).Should().BeTrue();
+                actual.Should().Be(entry.Value);
             }
         }
 
         [TestMethod]
         public void TryGetValue_ShouldThrowArgumentNullException_WhenKeyIsNull()
         {
-            Dictionary<string, object> dict = GetRandomStringObjectDictionary(10);
+            var dict = GetRandomStringObjectDictionary(10);
 
-            Action act = () => dict.TryGetValue(null!, out _);
-            act.Should().Throw<ArgumentNullException>();
+            FluentActions.Invoking(() => dict.TryGetValue(null!, out _))
+                .Should().Throw<ArgumentNullException>();
         }
 
         private static Dictionary<string, object> GetRandomStringObjectDictionary(int size)
@@ -140,17 +128,14 @@ namespace Grondo.Tests.Extensions
         public void GetOrAdd_KeyExists_ReturnsExisting()
         {
             var dict = new Dictionary<string, int> { { "a", 42 } };
-            int result = dict.GetOrAdd("a", () => 999);
-            result.Should().Be(42);
+            dict.GetOrAdd("a", () => 999).Should().Be(42);
         }
 
         [TestMethod]
         public void GetOrAdd_KeyNotExists_CreatesAndAdds()
         {
             var dict = new Dictionary<string, int>();
-            int result = dict.GetOrAdd("a", () => 42);
-
-            result.Should().Be(42);
+            dict.GetOrAdd("a", () => 42).Should().Be(42);
             dict["a"].Should().Be(42);
         }
 
