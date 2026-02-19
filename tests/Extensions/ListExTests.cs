@@ -219,9 +219,7 @@ namespace Grondo.Tests.Extensions
         [TestMethod]
         public void ContainsIgnoreCase_DoesContainMatchingCase_ReturnsTrue()
         {
-            // Arrange & Assert
-            const string TestValue = "Hello world";
-            new List<string> { { TestValue } }.ContainsIgnoreCase(TestValue).Should().BeTrue();
+            new List<string> { { "Hello world" } }.ContainsIgnoreCase("Hello world").Should().BeTrue();
         }
 
         [TestMethod]
