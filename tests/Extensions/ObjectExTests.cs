@@ -89,6 +89,33 @@ namespace Grondo.Tests.Extensions
             content.Should().NotBeNull();
             content.Headers.ContentType!.MediaType.Should().Be("application/json");
         }
+
+        // --- Pipe ---
+
+        [TestMethod]
+        public void Pipe_ExecutesSideEffect_ReturnsOriginal()
+        {
+            int sideEffect = 0;
+            int result = 42.Pipe(x => sideEffect = x);
+            result.Should().Be(42);
+            sideEffect.Should().Be(42);
+        }
+
+        [TestMethod]
+        public void Pipe_InFluentChain_MaintainsFlow()
+        {
+            string? captured = null;
+            string result = "hello".Pipe(s => captured = s).ToUpper();
+            result.Should().Be("HELLO");
+            captured.Should().Be("hello");
+        }
+
+        [TestMethod]
+        public void Pipe_NullAction_ThrowsArgumentNullException()
+        {
+            Action act = () => 42.Pipe((Action<int>)null!);
+            act.Should().Throw<ArgumentNullException>();
+        }
     }
 }
 

@@ -170,7 +170,7 @@ namespace Grondo.Tests.Extensions
         {
             var dt = new DateTime(2024, 6, 15, 0, 0, 0);
             DateTime result = dt.EndOfDay();
-            result.Should().Be(new DateTime(2024, 6, 15, 23, 59, 59, 999));
+            result.Should().Be(new DateTime(2024, 6, 15).AddDays(1).AddTicks(-1));
         }
 
         // --- StartOfMonth / EndOfMonth ---

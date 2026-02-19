@@ -101,15 +101,14 @@
                 ArgumentNullException.ThrowIfNull(list);
                 ArgumentNullException.ThrowIfNull(range);
 
-                IEnumerable<string> enumerable = range as string[] ?? [.. range];
-                if (!enumerable.Any())
-                {
-                    return list;
-                }
+                var existing = new HashSet<string>(list, StringComparer.OrdinalIgnoreCase);
 
-                foreach (string item in enumerable)
+                foreach (string item in range)
                 {
-                    list.AddIfNotExists(item);
+                    if (existing.Add(item))
+                    {
+                        list.Add(item);
+                    }
                 }
 
                 return list;

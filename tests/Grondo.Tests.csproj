@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+		<!-- Use 'latest' instead of '14' to allow test projects to use newer C# features without requiring preview in the library -->
 		<LangVersion>latest</LangVersion>
 		<IsPackable>false</IsPackable>
 		<RootNamespace>Grondo.Tests</RootNamespace>

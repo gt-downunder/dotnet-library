@@ -18,6 +18,8 @@ namespace Grondo.Extensions
             /// </summary>
             /// <typeparam name="TObject">What to deserialize the response to</typeparam>
             /// <param name="propertyNameCaseInsensitive">Indicates whether a property's name uses a case-insensitive comparison during deserialization.</param>
+            /// <returns>The deserialized object, or <c>null</c> if the JSON represents a null value.</returns>
+            /// <exception cref="HttpRequestException">Thrown if the response content is null, empty, or whitespace, or if the response status code indicates failure.</exception>
             public async Task<TObject?> EnsureObjectAsync<TObject>(bool propertyNameCaseInsensitive = true)
             {
                 response.EnsureSuccessStatusCode();
@@ -36,9 +38,10 @@ namespace Grondo.Extensions
         extension(HttpRequest request)
         {
             /// <summary>
-            /// Retrieve a raw string from the <see cref="HttpRequest.Body"/> stream
+            /// Retrieve a raw string from the <see cref="HttpRequest.Body"/> stream.
             /// </summary>
-            /// <param name="encoding">Optional character encoding, defaults to UTF8</param>
+            /// <param name="encoding">Optional character encoding, defaults to UTF8.</param>
+            /// <returns>The raw body content as a string.</returns>
             public async Task<string> GetRawBodyAsync(Encoding? encoding = null)
             {
                 encoding ??= Encoding.UTF8;
@@ -48,9 +51,10 @@ namespace Grondo.Extensions
             }
 
             /// <summary>
-            /// Retrieves a raw byte array from the <see cref="HttpRequest.Body"/> stream
+            /// Retrieves a raw byte array from the <see cref="HttpRequest.Body"/> stream.
             /// </summary>
             /// <param name="token">An optional cancellation token.</param>
+            /// <returns>The raw body content as a byte array.</returns>
             public async Task<byte[]> GetRawBodyAsync(CancellationToken token = default)
             {
                 await using MemoryStream stream = new();

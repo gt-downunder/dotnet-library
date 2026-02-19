@@ -40,6 +40,44 @@ namespace Grondo.Tests.Extensions
 
         [TestMethod]
         public void ToHumanReadable_Years_ReturnsYears() => TimeSpan.FromDays(400).ToHumanReadable().Should().Contain("1 year");
+
+        [TestMethod]
+        public void ToHumanReadable_MinutesAndSeconds_IncludesSeconds()
+        {
+            var ts = new TimeSpan(0, 0, 1, 30);
+            string result = ts.ToHumanReadable();
+            result.Should().Contain("1 minute");
+            result.Should().Contain("30 seconds");
+        }
+
+        [TestMethod]
+        public void ToHumanReadable_HoursMinutesSeconds_IncludesAll()
+        {
+            var ts = new TimeSpan(0, 2, 15, 45);
+            string result = ts.ToHumanReadable();
+            result.Should().Contain("2 hours");
+            result.Should().Contain("15 minutes");
+            result.Should().Contain("45 seconds");
+        }
+
+        [TestMethod]
+        public void ToHumanReadable_MaxParts_LimitsParts()
+        {
+            var ts = new TimeSpan(2, 5, 30, 45);
+            string result = ts.ToHumanReadable(maxParts: 2);
+            result.Should().Contain("2 days");
+            result.Should().Contain("5 hours");
+            result.Should().NotContain("minutes");
+            result.Should().NotContain("seconds");
+        }
+
+        [TestMethod]
+        public void ToHumanReadable_MaxPartsOne_ReturnsSinglePart()
+        {
+            var ts = new TimeSpan(2, 5, 30, 45);
+            string result = ts.ToHumanReadable(maxParts: 1);
+            result.Should().Be("2 days");
+        }
     }
 }
 

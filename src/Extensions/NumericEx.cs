@@ -3,20 +3,120 @@
 namespace Grondo.Extensions
 {
     /// <summary>
-    /// Provides extension methods for numeric types implementing <see cref="System.Numerics.INumber{T}"/>.
+    /// Provides extension methods for numeric types implementing <see cref="INumber{T}"/>.
     /// </summary>
     public static class NumericEx
     {
+        private static readonly string[] _binarySuffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
+        private static readonly string[] _siSuffixes = ["B", "kB", "MB", "GB", "TB", "PB", "EB"];
+
         extension<T>(T number) where T : INumber<T>
         {
             /// <summary>Determines whether the numeric value is equal to zero.</summary>
+            /// <returns><c>true</c> if the value equals zero; otherwise, <c>false</c>.</returns>
             public bool IsZero() => number == T.Zero;
 
             /// <summary>Determines whether the numeric value is greater than zero.</summary>
+            /// <returns><c>true</c> if the value is greater than zero; otherwise, <c>false</c>.</returns>
             public bool IsPositive() => number > T.Zero;
 
             /// <summary>Determines whether the numeric value is less than zero.</summary>
+            /// <returns><c>true</c> if the value is less than zero; otherwise, <c>false</c>.</returns>
             public bool IsNegative() => number < T.Zero;
+        }
+
+        extension(long bytes)
+        {
+            /// <summary>
+            /// Converts a byte count to a human-readable size string such as "1.5 KB" or "3.2 MB".
+            /// </summary>
+            /// <param name="useSI">If <c>true</c>, uses SI (1000-based) units; otherwise uses binary (1024-based) units.</param>
+            /// <returns>A human-readable byte size string.</returns>
+            public string ToHumanByteSize(bool useSI = false)
+            {
+                if (bytes == 0) return "0 B";
+
+                int divisor = useSI ? 1000 : 1024;
+                string[] suffixes = useSI ? _siSuffixes : _binarySuffixes;
+                double abs = Math.Abs(bytes);
+                int order = (int)Math.Floor(Math.Log(abs, divisor));
+                order = Math.Min(order, suffixes.Length - 1);
+                double value = abs / Math.Pow(divisor, order);
+
+                string formatted = value % 1 == 0
+                    ? value.ToString("F0", System.Globalization.CultureInfo.InvariantCulture)
+                    : value.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+                return bytes < 0 ? $"-{formatted} {suffixes[order]}" : $"{formatted} {suffixes[order]}";
+            }
+        }
+
+        extension(int number)
+        {
+            /// <summary>
+            /// Converts the integer to its ordinal string representation (e.g., 1 → "1st", 2 → "2nd", 3 → "3rd").
+            /// </summary>
+            /// <returns>The ordinal string representation.</returns>
+            public string ToOrdinal()
+            {
+                int abs = Math.Abs(number);
+                int lastTwo = abs % 100;
+                int lastOne = abs % 10;
+
+                string suffix = lastTwo is >= 11 and <= 13
+                    ? "th"
+                    : lastOne switch
+                    {
+                        1 => "st",
+                        2 => "nd",
+                        3 => "rd",
+                        _ => "th"
+                    };
+
+                return $"{number}{suffix}";
+            }
+
+            /// <summary>Creates a <see cref="TimeSpan"/> representing the specified number of days.</summary>
+            /// <returns>A <see cref="TimeSpan"/> of the specified number of days.</returns>
+            public TimeSpan Days() => TimeSpan.FromDays(number);
+
+            /// <summary>Creates a <see cref="TimeSpan"/> representing the specified number of hours.</summary>
+            /// <returns>A <see cref="TimeSpan"/> of the specified number of hours.</returns>
+            public TimeSpan Hours() => TimeSpan.FromHours(number);
+
+            /// <summary>Creates a <see cref="TimeSpan"/> representing the specified number of minutes.</summary>
+            /// <returns>A <see cref="TimeSpan"/> of the specified number of minutes.</returns>
+            public TimeSpan Minutes() => TimeSpan.FromMinutes(number);
+
+            /// <summary>Creates a <see cref="TimeSpan"/> representing the specified number of seconds.</summary>
+            /// <returns>A <see cref="TimeSpan"/> of the specified number of seconds.</returns>
+            public TimeSpan Seconds() => TimeSpan.FromSeconds(number);
+
+            /// <summary>Creates a <see cref="TimeSpan"/> representing the specified number of milliseconds.</summary>
+            /// <returns>A <see cref="TimeSpan"/> of the specified number of milliseconds.</returns>
+            public TimeSpan Milliseconds() => TimeSpan.FromMilliseconds(number);
+        }
+
+        extension(double number)
+        {
+            /// <summary>Creates a <see cref="TimeSpan"/> representing the specified number of days.</summary>
+            /// <returns>A <see cref="TimeSpan"/> of the specified number of days.</returns>
+            public TimeSpan Days() => TimeSpan.FromDays(number);
+
+            /// <summary>Creates a <see cref="TimeSpan"/> representing the specified number of hours.</summary>
+            /// <returns>A <see cref="TimeSpan"/> of the specified number of hours.</returns>
+            public TimeSpan Hours() => TimeSpan.FromHours(number);
+
+            /// <summary>Creates a <see cref="TimeSpan"/> representing the specified number of minutes.</summary>
+            /// <returns>A <see cref="TimeSpan"/> of the specified number of minutes.</returns>
+            public TimeSpan Minutes() => TimeSpan.FromMinutes(number);
+
+            /// <summary>Creates a <see cref="TimeSpan"/> representing the specified number of seconds.</summary>
+            /// <returns>A <see cref="TimeSpan"/> of the specified number of seconds.</returns>
+            public TimeSpan Seconds() => TimeSpan.FromSeconds(number);
+
+            /// <summary>Creates a <see cref="TimeSpan"/> representing the specified number of milliseconds.</summary>
+            /// <returns>A <see cref="TimeSpan"/> of the specified number of milliseconds.</returns>
+            public TimeSpan Milliseconds() => TimeSpan.FromMilliseconds(number);
         }
     }
 }
