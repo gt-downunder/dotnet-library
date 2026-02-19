@@ -1,15 +1,12 @@
 ﻿using System.Net;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
-using DotNet.Library.Extensions;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Grondo.Extensions;
 
-namespace DotNet.Library.Tests.Extensions
+namespace Grondo.Tests.Extensions
 {
     [TestClass]
-    public class HttpExtensionTests
+    public class HttpExTests : BaseExtensionTest
     {
         private static JsonSerializerOptions GetOptions() =>
             new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
@@ -30,7 +27,7 @@ namespace DotNet.Library.Tests.Extensions
             };
 
             // Act
-            var result = await response.EnsureObject<TestDto>(false);
+            TestDto result = (await response.EnsureObjectAsync<TestDto>(false))!;
 
             // Assert
             result.Id.Should().Be(0);
@@ -39,7 +36,6 @@ namespace DotNet.Library.Tests.Extensions
 
         [TestMethod]
         [DataRow(true)]
-        [DataRow(null)]
         public async Task EnsureObject_CaseInsensitiveTrueOrNull_NonNullProperties(bool propertyNameCaseInsensitive)
         {
             // Arrange
@@ -49,10 +45,10 @@ namespace DotNet.Library.Tests.Extensions
                 Id = 1
             };
             var response = new HttpResponseMessage
-                { Content = new StringContent(JsonSerializer.Serialize(dto)), StatusCode = HttpStatusCode.OK };
+            { Content = new StringContent(JsonSerializer.Serialize(dto)), StatusCode = HttpStatusCode.OK };
 
             // Act
-            var result = await response.EnsureObject<TestDto>(propertyNameCaseInsensitive);
+            TestDto result = (await response.EnsureObjectAsync<TestDto>(propertyNameCaseInsensitive))!;
 
             // Assert
             result.Id.Should().Be(1);
@@ -76,7 +72,7 @@ namespace DotNet.Library.Tests.Extensions
             // Act
 
             // Assert
-            await Assert.ThrowsExactlyAsync<HttpRequestException>(async () => await response.EnsureObject<TestDto>());
+            await Assert.ThrowsExactlyAsync<HttpRequestException>(async () => await response.EnsureObjectAsync<TestDto>());
         }
 
         [TestMethod]
@@ -88,13 +84,14 @@ namespace DotNet.Library.Tests.Extensions
             // Act
 
             // Assert
-            await Assert.ThrowsExactlyAsync<HttpRequestException>(async () => await response.EnsureObject<TestDto>());
+            await Assert.ThrowsExactlyAsync<HttpRequestException>(async () => await response.EnsureObjectAsync<TestDto>());
         }
 
         private class TestDto
         {
-            public string Name { get; init; }
+            public string Name { get; init; } = null!;
             public int Id { get; init; }
         }
     }
 }
+

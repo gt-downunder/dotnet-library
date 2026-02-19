@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace DotNet.Library.Tests.Extensions
+namespace Grondo.Tests.Extensions
 {
     [TestClass]
     [TestCategory("Extensions")]

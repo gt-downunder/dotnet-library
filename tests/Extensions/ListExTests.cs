@@ -1,24 +1,21 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using DotNet.Library.Extensions;
-using FluentAssertions;
+﻿using FluentAssertions;
+using Grondo.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace DotNet.Library.Tests.Extensions
+namespace Grondo.Tests.Extensions
 {
     [TestClass]
-    public class GenericListExTests : BaseExtensionTest
+    public class ListExTests : BaseExtensionTest
     {
         [TestMethod]
         public void Add_EmptyStringListWithValidItems_Success()
         {
             // Arrange
-            var itemsToAdd = new string[] { "1", "2", "3" };
-            var list = new List<string>
-            {
-                // Act
-                itemsToAdd
-            };
+            string[] itemsToAdd = ["1", "2", "3"];
+            var list = new List<string>();
+
+            // Act
+            list.Add(itemsToAdd);
 
             // Assert
             list.Count.Should().Be(itemsToAdd.Length);
@@ -29,14 +26,13 @@ namespace DotNet.Library.Tests.Extensions
         public void Add_NonEmptyStringListWithValidItems_Success()
         {
             // Arrange
-            var itemsToAdd = new string[] { "1", "2", "3" };
-            var existingItems = new string[] { "Hello", "World", "How are", "you today?" };
-            var list = new List<string>
-            {
-                existingItems,
-                // Act
-                itemsToAdd
-            };
+            string[] itemsToAdd = ["1", "2", "3"];
+            string[] existingItems = ["Hello", "World", "How are", "you today?"];
+            var list = new List<string>();
+            list.Add(existingItems);
+
+            // Act
+            list.Add(itemsToAdd);
 
             // Assert
             list.Count.Should().Be(itemsToAdd.Length + existingItems.Length);
@@ -48,12 +44,11 @@ namespace DotNet.Library.Tests.Extensions
         public void Add_EmptyIntListWithValidItems_Success()
         {
             // Arrange
-            var itemsToAdd = new int[] { 1, 2, 3 };
-            var list = new List<int>
-            {
-                // Act
-                itemsToAdd
-            };
+            int[] itemsToAdd = [1, 2, 3];
+            var list = new List<int>();
+
+            // Act
+            list.Add(itemsToAdd);
 
             // Assert
             list.Count.Should().Be(itemsToAdd.Length);
@@ -64,14 +59,13 @@ namespace DotNet.Library.Tests.Extensions
         public void Add_NonEmptyIntListWithValidItems_Success()
         {
             // Arrange
-            var itemsToAdd = new int[] { 1, 2, 3 };
-            var existingItems = new int[] { 100, 200, 300, 400 };
-            var list = new List<int>
-            {
-                existingItems,
-                // Act
-                itemsToAdd
-            };
+            int[] itemsToAdd = [1, 2, 3];
+            int[] existingItems = [100, 200, 300, 400];
+            var list = new List<int>();
+            list.Add(existingItems);
+
+            // Act
+            list.Add(itemsToAdd);
 
             // Assert
             list.Count.Should().Be(itemsToAdd.Length + existingItems.Length);
@@ -128,8 +122,8 @@ namespace DotNet.Library.Tests.Extensions
         public void AddIfNotNull_NullString_NotAdded()
         {
             // Arrange
-            var list = new List<string>();
-            const string testValue = null;
+            var list = new List<string?>();
+            string? testValue = null;
 
             // Act
             list.AddIfNotNull(testValue);
@@ -146,15 +140,15 @@ namespace DotNet.Library.Tests.Extensions
         {
             // Arrange
             var list = new List<string> { existingValue };
-            const string newValue = "hello world";
+            const string NewValue = "hello world";
 
             // Act
-            list.AddIfNotExists(newValue);
+            list.AddIfNotExists(NewValue);
 
             // Assert
             list.Count.Should().Be(2);
             list.Should().Contain(existingValue);
-            list.Should().Contain(newValue);
+            list.Should().Contain(NewValue);
         }
 
         [TestMethod]
@@ -185,8 +179,9 @@ namespace DotNet.Library.Tests.Extensions
                 "you doing"
             };
 
-            var existingValues = new string[] { "hello", "world", "how are", "you today" };
-            var list = new List<string> { existingValues };
+            string[] existingValues = ["hello", "world", "how are", "you today"];
+            var list = new List<string>();
+            list.Add(existingValues);
 
             // Act
             list.AddRangeNoDuplicates(newValues);
@@ -208,8 +203,9 @@ namespace DotNet.Library.Tests.Extensions
                 "you doing?"
             };
 
-            var existingValues = new string[] { "hello", "world", "how are", "you today" };
-            var list = new List<string> { existingValues };
+            string[] existingValues = ["hello", "world", "how are", "you today"];
+            var list = new List<string>();
+            list.Add(existingValues);
 
             // Act
             list.AddRangeNoDuplicates(newValues);
@@ -224,11 +220,11 @@ namespace DotNet.Library.Tests.Extensions
         public void ContainsIgnoreCase_DoesContainMatchingCase_ReturnsTrue()
         {
             // Arrange
-            const string testValue = "Hello world";
-            var list = new List<string> { { testValue } };
+            const string TestValue = "Hello world";
+            var list = new List<string> { { TestValue } };
 
             // Act
-            var result = list.ContainsIgnoreCase(testValue);
+            bool result = list.ContainsIgnoreCase(TestValue);
 
             // Assert
             result.Should().BeTrue();
@@ -244,7 +240,7 @@ namespace DotNet.Library.Tests.Extensions
             var list = new List<string> { { "Hello world" } };
 
             // Act
-            var result = list.ContainsIgnoreCase(testValue.ToLower());
+            bool result = list.ContainsIgnoreCase(testValue.ToLower());
 
             // Assert
             result.Should().BeTrue();
@@ -260,7 +256,7 @@ namespace DotNet.Library.Tests.Extensions
             var list = new List<string> { { "Hello world" } };
 
             // Act
-            var result = list.ContainsIgnoreCase(testValue.ToLower());
+            bool result = list.ContainsIgnoreCase(testValue.ToLower());
 
             // Assert
             result.Should().BeFalse();
@@ -281,7 +277,7 @@ namespace DotNet.Library.Tests.Extensions
             }
 
             // Act
-            var result = list.ContainsIgnoreCase(testValue.ToLower());
+            bool result = list.ContainsIgnoreCase(testValue.ToLower());
 
             // Assert
             result.Should().BeTrue();
@@ -300,7 +296,7 @@ namespace DotNet.Library.Tests.Extensions
             }
 
             // Act
-            var result = list.ContainsIgnoreCase(testValue.ToLower());
+            bool result = list.ContainsIgnoreCase(testValue.ToLower());
 
             // Assert
             result.Should().BeTrue();

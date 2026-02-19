@@ -1,18 +1,16 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 [assembly: Parallelize(Workers = 0, Scope = ExecutionScope.MethodLevel)]
-namespace DotNet.Library.Tests
+namespace Grondo.Tests
 {
     [TestCategory("Unit")]
     [TestClass]
     public class BaseTest
     {
-        protected IServiceProvider ServiceProvider { get; private set; }
+        protected IServiceProvider ServiceProvider { get; private set; } = null!;
 
-        protected ILoggerFactory LoggerFactory { get; set; }
+        protected ILoggerFactory LoggerFactory { get; set; } = null!;
 
         [TestInitialize]
         public void Initialize()
