@@ -62,7 +62,7 @@ jobs:
       run: dotnet pack src/Grondo.csproj --no-build -c Release -p:PackageVersion=${{ env.VERSION }} -o ./nupkgs/
 
     - name: Upload NuGet packages
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: nupkgs-${{ env.VERSION }}
         path: ./nupkgs/
