@@ -1,4 +1,4 @@
-name: Build Project and Publish NuGet Package
+﻿name: Build Project and Publish NuGet Package
 
 on:
     workflow_dispatch:
@@ -71,6 +71,9 @@ jobs:
     needs: build
     runs-on: ubuntu-24.04
 
+    permissions:
+      packages: write
+
     steps:
     - name: Download NuGet packages
       uses: actions/download-artifact@v7
@@ -86,3 +89,5 @@ jobs:
     - name: Push to NuGet
       run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.nuget_api_key }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
+    - name: Push to GitHub Packages
+      run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/gt-downunder/index.json --skip-duplicate
