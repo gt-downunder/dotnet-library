@@ -1,10 +1,13 @@
-name: Build Project and Publish NuGet Package
+﻿name: Build Project and Publish NuGet Package
 
 on:
     workflow_dispatch:
     push:
         branches:
             - main
+
+permissions:
+  contents: read
 
 env:
   DOTNET_SDK_VERSION: 10.0.x
