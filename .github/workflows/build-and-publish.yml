@@ -73,7 +73,7 @@ jobs:
 
     steps:
     - name: Download NuGet packages
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v7
       with:
         name: nupkgs-${{ needs.build.outputs.VERSION }}
         path: ./nupkgs/
