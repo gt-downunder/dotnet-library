@@ -12,7 +12,7 @@ A complete reference for every public API in the Grondo library with practical c
 > **Requirements:** .NET 10 · C# 14
 
 [Get started](#getting-started){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
-[View on GitHub](https://github.com/gt-downunder/grondo){: .btn .fs-5 .mb-4 .mb-md-0 }
+[View on GitHub](https://github.com/gt-downunder/Grondo){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ---
 

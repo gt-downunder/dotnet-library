@@ -74,7 +74,7 @@ Pre-built exception types mapped to HTTP status codes, each extending `Exception
 | `TechnicalException` | 500 |
 | `MethodNotAvailableException` | 501 |
 
-> 📖 **[Explore the full documentation with code examples →](https://gt-downunder.github.io/grondo/)**
+> 📖 **[Explore the full documentation with code examples →](https://gt-downunder.github.io/Grondo/)**
 
 ## Usage
 
@@ -274,7 +274,7 @@ dotnet run --project benchmarks -c Release -- --filter "*StringEx*"
 
 ## Documentation
 
-> 📖 **[gt-downunder.github.io/grondo](https://gt-downunder.github.io/grondo/)** — Full API reference with practical code examples for every public method.
+> 📖 **[gt-downunder.github.io/Grondo](https://gt-downunder.github.io/Grondo/)** — Full API reference with practical code examples for every public method.
 
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — Guidelines for contributing to this project
 

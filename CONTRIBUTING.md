@@ -250,7 +250,7 @@ Direct pushes to `main` are not allowed — all changes must go through a pull r
 
 ## Documentation
 
-> 📖 **[gt-downunder.github.io/grondo](https://gt-downunder.github.io/grondo/)** — Full API reference with practical code examples for every public method.
+> 📖 **[gt-downunder.github.io/Grondo](https://gt-downunder.github.io/Grondo/)** — Full API reference with practical code examples for every public method.
 
 When adding new public APIs, ensure they are documented in the `docs/` directory as well.
 

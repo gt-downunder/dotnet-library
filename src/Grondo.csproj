@@ -9,7 +9,7 @@
         <PackageId>Grondo</PackageId>
         <Title>Grondo</Title>
         <Description>C# 14 / .NET 10 extension methods, utilities, and custom exception types</Description>
-        <PackageTags>csharp dotnet extensions utilities exceptions grondo</PackageTags>
+        <PackageTags>csharp dotnet extensions utilities exceptions Grondo</PackageTags>
         <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/gt-downunder/dotnet-library</PackageProjectUrl>
         <RepositoryUrl>https://github.com/gt-downunder/dotnet-library.git</RepositoryUrl>
