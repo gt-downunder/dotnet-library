@@ -1,7 +1,8 @@
 ﻿namespace Grondo.Extensions
 {
     /// <summary>
-    /// Provides extension methods for <see cref="IEnumerable{T}"/>.
+    /// Provides synchronous extension methods for <see cref="IEnumerable{T}"/>.
+    /// For asynchronous extensions, see <see cref="EnumerableExAsync"/>.
     /// </summary>
     public static class EnumerableEx
     {
@@ -115,13 +116,13 @@
                     batch.Add(item);
                     if (batch.Count == batchSize)
                     {
-                        yield return batch;
-                        batch = new List<T>(batchSize);
+                        yield return batch.ToArray(); // Return array instead of list
+                        batch.Clear(); // Reuse list instead of allocating new one
                     }
                 }
 
                 if (batch.Count > 0)
-                    yield return batch;
+                    yield return batch.ToArray();
             }
 
             /// <summary>
@@ -242,14 +243,14 @@
                 ArgumentNullException.ThrowIfNull(source);
                 ArgumentOutOfRangeException.ThrowIfLessThan(size, 1);
 
-                var window = new List<T>(size);
+                var window = new Queue<T>(size);
                 foreach (T item in source)
                 {
-                    window.Add(item);
+                    window.Enqueue(item);
                     if (window.Count == size)
                     {
-                        yield return window.ToList().AsReadOnly();
-                        window.RemoveAt(0);
+                        yield return window.ToArray();
+                        window.Dequeue();
                     }
                 }
             }

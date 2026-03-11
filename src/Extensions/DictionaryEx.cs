@@ -9,7 +9,7 @@ namespace Grondo.Extensions
     /// </summary>
     public static class DictionaryEx
     {
-        extension<TK, TV>(IDictionary<TK, TV> source)
+        extension<TKey, TValue>(IDictionary<TKey, TValue> source)
         {
             /// <summary>
             /// Serializes the dictionary into a JSON string.
@@ -27,19 +27,19 @@ namespace Grondo.Extensions
             /// </summary>
             /// <param name="key">The key to locate.</param>
             /// <returns><c>true</c> if the dictionary contains the key and its value is not null; otherwise, <c>false</c>.</returns>
-            public bool HasKeyAndValue(TK key) =>
-                source.TryGetValue(key, out TV? value) && value is not null;
+            public bool HasKeyAndValue(TKey key) =>
+                source.TryGetValue(key, out TValue? value) && value is not null;
 
             /// <summary>
             /// Determines whether the dictionary contains any of the specified keys.
             /// </summary>
             /// <param name="keyList">An array of keys to search for.</param>
             /// <returns><c>true</c> if any of the keys are present in the dictionary; otherwise, <c>false</c>.</returns>
-            public bool HasAnyKey(TK[]? keyList)
+            public bool HasAnyKey(TKey[]? keyList)
             {
                 if (keyList is null) return false;
 
-                foreach (TK? key in keyList)
+                foreach (TKey? key in keyList)
                 {
                     if (key is not null && source.ContainsKey(key)) return true;
                 }
@@ -58,7 +58,7 @@ namespace Grondo.Extensions
 
                 var sb = new StringBuilder("?");
                 bool first = true;
-                foreach (KeyValuePair<TK, TV> kv in source)
+                foreach (KeyValuePair<TKey, TValue> kv in source)
                 {
                     if (!first) sb.Append('&');
                     first = false;
@@ -82,12 +82,12 @@ namespace Grondo.Extensions
             /// </summary>
             /// <param name="other">The dictionary to compare with.</param>
             /// <returns><c>true</c> if both dictionaries contain the same key-value pairs; otherwise, <c>false</c>.</returns>
-            public bool IsDeepEqualTo(IDictionary<TK, TV> other)
+            public bool IsDeepEqualTo(IDictionary<TKey, TValue> other)
             {
                 ArgumentNullException.ThrowIfNull(source);
                 ArgumentNullException.ThrowIfNull(other);
                 return source.Count == other.Count && source.All(kv =>
-                    other.TryGetValue(kv.Key, out TV? val) && EqualityComparer<TV>.Default.Equals(kv.Value, val));
+                    other.TryGetValue(kv.Key, out TValue? val) && EqualityComparer<TValue>.Default.Equals(kv.Value, val));
             }
 
             /// <summary>
@@ -97,12 +97,12 @@ namespace Grondo.Extensions
             /// <param name="other">The dictionary to merge from.</param>
             /// <param name="overwrite">Whether to overwrite existing keys. Defaults to <c>true</c>.</param>
             /// <exception cref="ArgumentNullException">Thrown if the source or <paramref name="other"/> is null.</exception>
-            public void Merge(IDictionary<TK, TV> other, bool overwrite = true)
+            public void Merge(IDictionary<TKey, TValue> other, bool overwrite = true)
             {
                 ArgumentNullException.ThrowIfNull(source);
                 ArgumentNullException.ThrowIfNull(other);
 
-                foreach (KeyValuePair<TK, TV> kvp in other)
+                foreach (KeyValuePair<TKey, TValue> kvp in other)
                 {
                     if (overwrite || !source.ContainsKey(kvp.Key))
                         source[kvp.Key] = kvp.Value;
@@ -117,30 +117,30 @@ namespace Grondo.Extensions
             /// <param name="factory">The function to create a value if the key does not exist.</param>
             /// <returns>The existing or newly created value.</returns>
             /// <exception cref="ArgumentNullException">Thrown if the source, <paramref name="key"/>, or <paramref name="factory"/> is null.</exception>
-            public TV GetOrAdd(TK key, Func<TV> factory)
+            public TValue GetOrAdd(TKey key, Func<TValue> factory)
             {
                 ArgumentNullException.ThrowIfNull(source);
                 ArgumentNullException.ThrowIfNull(key);
                 ArgumentNullException.ThrowIfNull(factory);
 
-                if (source.TryGetValue(key, out TV? existing))
+                if (source.TryGetValue(key, out TValue? existing))
                     return existing;
 
-                TV newValue = factory();
+                TValue newValue = factory();
                 source[key] = newValue;
                 return newValue;
             }
         }
 
-        extension<TK, TV>(IDictionary<TK, TV?> source)
+        extension<TKey, TValue>(IDictionary<TKey, TValue?> source)
         {
             /// <summary>
             /// Retrieves the value associated with the specified key, or the default value if the key is not found.
             /// </summary>
             /// <param name="key">The key to locate.</param>
-            /// <returns>The value associated with the key if found; otherwise, the default value of <typeparamref name="TV"/>.</returns>
-            public TV? GetValueOrDefault(TK key) =>
-                source.TryGetValue(key, out TV? value) ? value : default;
+            /// <returns>The value associated with the key if found; otherwise, the default value of <typeparamref name="TValue"/>.</returns>
+            public TValue? GetValueOrDefault(TKey key) =>
+                source.TryGetValue(key, out TValue? value) ? value : default;
         }
 
         extension<TKey, TValue>(IDictionary<TKey, TValue> dict) where TKey : notnull

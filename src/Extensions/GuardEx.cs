@@ -23,6 +23,20 @@ namespace Grondo.Extensions
         extension(string? value)
         {
             /// <summary>
+            /// Throws <see cref="ArgumentException"/> if the string is null or empty.
+            /// </summary>
+            /// <param name="paramName">The name of the parameter.</param>
+            /// <returns>The non-null, non-empty string value.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the value is null.</exception>
+            /// <exception cref="ArgumentException">Thrown if the value is empty.</exception>
+            public string ThrowIfNullOrEmpty(string? paramName = null) =>
+                string.IsNullOrEmpty(value)
+                    ? throw (value is null
+                        ? new ArgumentNullException(paramName)
+                        : new ArgumentException("Value cannot be empty.", paramName))
+                    : value;
+
+            /// <summary>
             /// Throws <see cref="ArgumentException"/> if the string is null, empty, or whitespace.
             /// </summary>
             /// <param name="paramName">The name of the parameter.</param>
@@ -35,6 +49,44 @@ namespace Grondo.Extensions
                         ? new ArgumentNullException(paramName)
                         : new ArgumentException("Value cannot be empty or whitespace.", paramName))
                     : value;
+
+            /// <summary>
+            /// Throws <see cref="ArgumentException"/> if the string exceeds maximum length.
+            /// </summary>
+            /// <param name="maxLength">The maximum allowed length.</param>
+            /// <param name="paramName">The name of the parameter.</param>
+            /// <returns>The validated string value.</returns>
+            /// <exception cref="ArgumentException">Thrown if the string exceeds maximum length.</exception>
+            public string ThrowIfTooLong(int maxLength, string? paramName = null)
+            {
+                ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxLength, nameof(maxLength));
+
+                if (value?.Length > maxLength)
+                    throw new ArgumentException(
+                        $"Value cannot exceed {maxLength} characters. Actual: {value.Length}",
+                        paramName);
+
+                return value!;
+            }
+
+            /// <summary>
+            /// Throws <see cref="ArgumentException"/> if the string is shorter than minimum length.
+            /// </summary>
+            /// <param name="minLength">The minimum required length.</param>
+            /// <param name="paramName">The name of the parameter.</param>
+            /// <returns>The validated string value.</returns>
+            /// <exception cref="ArgumentException">Thrown if the string is shorter than minimum length.</exception>
+            public string ThrowIfTooShort(int minLength, string? paramName = null)
+            {
+                ArgumentOutOfRangeException.ThrowIfNegative(minLength, nameof(minLength));
+
+                if (value?.Length < minLength)
+                    throw new ArgumentException(
+                        $"Value must be at least {minLength} characters. Actual: {value?.Length ?? 0}",
+                        paramName);
+
+                return value!;
+            }
 
             /// <summary>
             /// Throws <see cref="ArgumentException"/> if the string does not match the specified regex pattern.
@@ -81,6 +133,136 @@ namespace Grondo.Extensions
             {
                 ArgumentNullException.ThrowIfNull(value, paramName);
                 if (!value.Any()) throw new ArgumentException("Collection cannot be empty.", paramName);
+                return value;
+            }
+
+            /// <summary>
+            /// Throws <see cref="ArgumentException"/> if the collection contains the specified item.
+            /// </summary>
+            /// <param name="item">The item to check for.</param>
+            /// <param name="paramName">The name of the parameter.</param>
+            /// <returns>The validated collection.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the collection is null.</exception>
+            /// <exception cref="ArgumentException">Thrown if the collection contains the item.</exception>
+            public IEnumerable<T> ThrowIfContains(T item, string? paramName = null)
+            {
+                ArgumentNullException.ThrowIfNull(value, paramName);
+
+                if (value.Contains(item))
+                    throw new ArgumentException(
+                        $"Collection cannot contain {item}",
+                        paramName);
+
+                return value;
+            }
+
+            /// <summary>
+            /// Throws <see cref="ArgumentException"/> if the collection does not contain the specified item.
+            /// </summary>
+            /// <param name="item">The item to check for.</param>
+            /// <param name="paramName">The name of the parameter.</param>
+            /// <returns>The validated collection.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the collection is null.</exception>
+            /// <exception cref="ArgumentException">Thrown if the collection does not contain the item.</exception>
+            public IEnumerable<T> ThrowIfDoesNotContain(T item, string? paramName = null)
+            {
+                ArgumentNullException.ThrowIfNull(value, paramName);
+
+                if (!value.Contains(item))
+                    throw new ArgumentException(
+                        $"Collection must contain {item}",
+                        paramName);
+
+                return value;
+            }
+        }
+
+        extension<TEnum>(TEnum value) where TEnum : struct, Enum
+        {
+            /// <summary>
+            /// Throws <see cref="ArgumentException"/> if the enum value is not defined.
+            /// </summary>
+            /// <param name="paramName">The name of the parameter.</param>
+            /// <returns>The validated enum value.</returns>
+            /// <exception cref="ArgumentException">Thrown if the value is not a defined enum value.</exception>
+            public TEnum ThrowIfNotDefined(string? paramName = null)
+            {
+                if (!Enum.IsDefined(value))
+                    throw new ArgumentException(
+                        $"Value {value} is not a valid {typeof(TEnum).Name}",
+                        paramName);
+
+                return value;
+            }
+        }
+
+        extension(DateTime value)
+        {
+            /// <summary>
+            /// Throws <see cref="ArgumentException"/> if the date is in the past.
+            /// </summary>
+            /// <param name="paramName">The name of the parameter.</param>
+            /// <returns>The validated date value.</returns>
+            /// <exception cref="ArgumentException">Thrown if the date is in the past.</exception>
+            public DateTime ThrowIfInPast(string? paramName = null)
+            {
+                if (value < DateTime.UtcNow)
+                    throw new ArgumentException(
+                        $"Date cannot be in the past. Value: {value:O}",
+                        paramName);
+
+                return value;
+            }
+
+            /// <summary>
+            /// Throws <see cref="ArgumentException"/> if the date is in the future.
+            /// </summary>
+            /// <param name="paramName">The name of the parameter.</param>
+            /// <returns>The validated date value.</returns>
+            /// <exception cref="ArgumentException">Thrown if the date is in the future.</exception>
+            public DateTime ThrowIfInFuture(string? paramName = null)
+            {
+                if (value > DateTime.UtcNow)
+                    throw new ArgumentException(
+                        $"Date cannot be in the future. Value: {value:O}",
+                        paramName);
+
+                return value;
+            }
+
+            /// <summary>
+            /// Throws <see cref="ArgumentOutOfRangeException"/> if the date is not within the specified range.
+            /// </summary>
+            /// <param name="min">The minimum allowed date (inclusive).</param>
+            /// <param name="max">The maximum allowed date (inclusive).</param>
+            /// <param name="paramName">The name of the parameter.</param>
+            /// <returns>The validated date value.</returns>
+            /// <exception cref="ArgumentOutOfRangeException">Thrown if the date is outside the range.</exception>
+            public DateTime ThrowIfNotInRange(DateTime min, DateTime max, string? paramName = null)
+            {
+                if (value < min || value > max)
+                    throw new ArgumentOutOfRangeException(
+                        paramName,
+                        value,
+                        $"Date must be between {min:O} and {max:O}");
+
+                return value;
+            }
+        }
+
+        extension(Guid value)
+        {
+            /// <summary>
+            /// Throws <see cref="ArgumentException"/> if the GUID is empty.
+            /// </summary>
+            /// <param name="paramName">The name of the parameter.</param>
+            /// <returns>The validated GUID value.</returns>
+            /// <exception cref="ArgumentException">Thrown if the GUID is empty.</exception>
+            public Guid ThrowIfEmpty(string? paramName = null)
+            {
+                if (value == Guid.Empty)
+                    throw new ArgumentException("GUID cannot be empty", paramName);
+
                 return value;
             }
         }

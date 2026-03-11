@@ -23,6 +23,17 @@ namespace Grondo.Extensions
 
         private static readonly EmailAddressAttribute _emailAddressValidator = new();
 
+        /// <summary>
+        /// Splits a string into words based on word boundaries (PascalCase, camelCase, snake_case, kebab-case).
+        /// </summary>
+        private static string[] SplitIntoWords(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return [];
+
+            return [.. WordBoundaryRegex().Split(value).Where(w => !string.IsNullOrEmpty(w))];
+        }
+
         extension(string value)
         {
             /// <summary>
@@ -201,7 +212,11 @@ namespace Grondo.Extensions
                     return value;
 
                 int maskLength = value.Length - visibleChars;
-                return new string(maskChar, maskLength) + value[maskLength..];
+                return string.Create(value.Length, (value, maskLength, maskChar), static (span, state) =>
+                {
+                    span[..state.maskLength].Fill(state.maskChar);
+                    state.value.AsSpan(state.maskLength).CopyTo(span[state.maskLength..]);
+                });
             }
 
             /// <summary>
@@ -243,7 +258,7 @@ namespace Grondo.Extensions
             public string ToSnakeCase()
             {
                 if (string.IsNullOrEmpty(value)) return value ?? string.Empty;
-                string[] words = [.. WordBoundaryRegex().Split(value).Where(w => !string.IsNullOrEmpty(w))];
+                string[] words = SplitIntoWords(value);
                 return string.Join("_", words).ToLowerInvariant();
             }
 
@@ -255,7 +270,7 @@ namespace Grondo.Extensions
             public string ToKebabCase()
             {
                 if (string.IsNullOrEmpty(value)) return value ?? string.Empty;
-                string[] words = [.. WordBoundaryRegex().Split(value).Where(w => !string.IsNullOrEmpty(w))];
+                string[] words = SplitIntoWords(value);
                 return string.Join("-", words).ToLowerInvariant();
             }
 
@@ -267,7 +282,7 @@ namespace Grondo.Extensions
             public string ToCamelCase()
             {
                 if (string.IsNullOrEmpty(value)) return value ?? string.Empty;
-                string[] words = [.. WordBoundaryRegex().Split(value).Where(w => !string.IsNullOrEmpty(w))];
+                string[] words = SplitIntoWords(value);
                 if (words.Length == 0) return string.Empty;
 
                 var sb = new StringBuilder();
@@ -291,7 +306,7 @@ namespace Grondo.Extensions
             public string Humanize()
             {
                 if (string.IsNullOrEmpty(value)) return value ?? string.Empty;
-                string[] words = [.. WordBoundaryRegex().Split(value).Where(w => !string.IsNullOrEmpty(w))];
+                string[] words = SplitIntoWords(value);
                 if (words.Length == 0) return string.Empty;
 
                 var sb = new StringBuilder();

@@ -56,7 +56,12 @@
         }
 
         internal static string Pluralize(int count, string unit) =>
-            $"{count} {unit}{(count == 1 ? "" : "s")}";
+            string.Format(
+                System.Globalization.CultureInfo.InvariantCulture,
+                "{0} {1}{2}",
+                count,
+                unit,
+                count == 1 ? "" : "s");
 
         internal static string FormatRelativeTime(TimeSpan diff)
         {
@@ -74,7 +79,9 @@
             };
 
             if (relative == "just now") return relative;
-            return isFuture ? $"in {relative}" : $"{relative} ago";
+            return isFuture
+                ? string.Format(System.Globalization.CultureInfo.InvariantCulture, "in {0}", relative)
+                : string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} ago", relative);
         }
     }
 }

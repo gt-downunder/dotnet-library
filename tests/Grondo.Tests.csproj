@@ -5,6 +5,8 @@
 		<LangVersion>latest</LangVersion>
 		<IsPackable>false</IsPackable>
 		<RootNamespace>Grondo.Tests</RootNamespace>
+		<!-- Disable XML documentation for test project -->
+		<GenerateDocumentationFile>false</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>

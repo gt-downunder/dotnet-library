@@ -4,7 +4,8 @@
     /// Represents the outcome of an operation that can either succeed with a value or fail with an error message.
     /// </summary>
     /// <typeparam name="T">The type of the success value.</typeparam>
-    public readonly struct Result<T>
+    [System.Diagnostics.DebuggerDisplay("{IsSuccess ? \"Success(\" + _value + \")\" : \"Failure(\" + _error + \")\"}}")]
+    public readonly struct Result<T> : IEquatable<Result<T>>
     {
         private readonly T? _value;
         private readonly string? _error;
@@ -42,7 +43,7 @@
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if the result is a success.</exception>
         public string Error => IsFailure
-            ? _error!
+            ? _error ?? "Result was created using default constructor"
             : throw new InvalidOperationException("Cannot access Error on a successful result.");
 
         /// <summary>Creates a successful result with the specified value.</summary>
@@ -189,6 +190,186 @@
         /// <returns>A string in the form "Success(value)" or "Failure(error)".</returns>
         public override string ToString() =>
             IsSuccess ? $"Success({_value})" : $"Failure({_error})";
+
+        /// <summary>
+        /// Determines whether the specified <see cref="Result{T}"/> is equal to the current <see cref="Result{T}"/>.
+        /// </summary>
+        /// <param name="other">The result to compare with the current result.</param>
+        /// <returns>true if the specified result is equal to the current result; otherwise, false.</returns>
+        public bool Equals(Result<T> other)
+        {
+            if (IsSuccess != other.IsSuccess)
+                return false;
+
+            return IsSuccess
+                ? EqualityComparer<T>.Default.Equals(_value, other._value)
+                : _error == other._error;
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to the current <see cref="Result{T}"/>.
+        /// </summary>
+        /// <param name="obj">The object to compare with the current result.</param>
+        /// <returns>true if the specified object is equal to the current result; otherwise, false.</returns>
+        public override bool Equals(object? obj) =>
+            obj is Result<T> other && Equals(other);
+
+        /// <summary>
+        /// Returns the hash code for this <see cref="Result{T}"/>.
+        /// </summary>
+        /// <returns>A hash code for the current result.</returns>
+        public override int GetHashCode()
+        {
+            if (!IsSuccess)
+                return HashCode.Combine(IsSuccess, _error);
+
+            return HashCode.Combine(IsSuccess, _value);
+        }
+
+        /// <summary>
+        /// Determines whether two <see cref="Result{T}"/> instances are equal.
+        /// </summary>
+        /// <param name="left">The first result to compare.</param>
+        /// <param name="right">The second result to compare.</param>
+        /// <returns>true if the results are equal; otherwise, false.</returns>
+        public static bool operator ==(Result<T> left, Result<T> right) =>
+            left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two <see cref="Result{T}"/> instances are not equal.
+        /// </summary>
+        /// <param name="left">The first result to compare.</param>
+        /// <param name="right">The second result to compare.</param>
+        /// <returns>true if the results are not equal; otherwise, false.</returns>
+        public static bool operator !=(Result<T> left, Result<T> right) =>
+            !left.Equals(right);
+
+        /// <summary>
+        /// Enables LINQ query syntax support (alias for Map).
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result value.</typeparam>
+        /// <param name="selector">The function to transform the success value.</param>
+        /// <returns>A new result with the transformed value, or the original failure.</returns>
+        public Result<TResult> Select<TResult>(Func<T, TResult> selector)
+        {
+            ArgumentNullException.ThrowIfNull(selector);
+            return Map(selector);
+        }
+
+        /// <summary>
+        /// Enables LINQ query syntax support for chaining operations.
+        /// </summary>
+        /// <typeparam name="TIntermediate">The type of the intermediate result.</typeparam>
+        /// <typeparam name="TResult">The type of the final result.</typeparam>
+        /// <param name="selector">The function that returns an intermediate result.</param>
+        /// <param name="projector">The function that combines the original and intermediate values.</param>
+        /// <returns>A new result with the projected value, or the first failure encountered.</returns>
+        public Result<TResult> SelectMany<TIntermediate, TResult>(
+            Func<T, Result<TIntermediate>> selector,
+            Func<T, TIntermediate, TResult> projector)
+        {
+            ArgumentNullException.ThrowIfNull(selector);
+            ArgumentNullException.ThrowIfNull(projector);
+            return Bind(t => selector(t).Map(i => projector(t, i)));
+        }
+
+        /// <summary>
+        /// Alias for Success (common convention in functional programming).
+        /// </summary>
+        /// <param name="value">The success value.</param>
+        /// <returns>A successful result containing the value.</returns>
+        public static Result<T> Ok(T value) => Success(value);
+
+        /// <summary>
+        /// Recovers from failure by converting the error to a success value.
+        /// </summary>
+        /// <param name="recovery">The function to convert the error to a value.</param>
+        /// <returns>This result if successful, or a new success result from the recovery function.</returns>
+        public Result<T> Recover(Func<string, T> recovery)
+        {
+            ArgumentNullException.ThrowIfNull(recovery);
+            return IsSuccess ? this : Success(recovery(_error!));
+        }
+
+        /// <summary>
+        /// Asynchronously recovers from failure.
+        /// </summary>
+        /// <param name="recovery">The async function to convert the error to a value.</param>
+        /// <returns>This result if successful, or a new success result from the recovery function.</returns>
+        public async Task<Result<T>> RecoverAsync(Func<string, Task<T>> recovery)
+        {
+            ArgumentNullException.ThrowIfNull(recovery);
+            return IsSuccess ? this : Success(await recovery(_error!).ConfigureAwait(false));
+        }
+
+        /// <summary>
+        /// Flattens a nested Result.
+        /// </summary>
+        /// <param name="nested">The nested result.</param>
+        /// <returns>The inner result.</returns>
+        public static Result<T> Flatten(Result<Result<T>> nested)
+        {
+            return nested.IsSuccess ? nested.Value : Failure(nested.Error);
+        }
+
+        /// <summary>
+        /// Combines two results into a tuple.
+        /// </summary>
+        /// <typeparam name="T1">The type of the first result.</typeparam>
+        /// <typeparam name="T2">The type of the second result.</typeparam>
+        /// <param name="first">The first result.</param>
+        /// <param name="second">The second result.</param>
+        /// <returns>A result containing a tuple of both values, or the first failure.</returns>
+        public static Result<(T1, T2)> Zip<T1, T2>(
+            Result<T1> first,
+            Result<T2> second)
+        {
+            if (first.IsFailure) return Result<(T1, T2)>.Failure(first.Error);
+            if (second.IsFailure) return Result<(T1, T2)>.Failure(second.Error);
+            return Result<(T1, T2)>.Success((first.Value, second.Value));
+        }
+
+        /// <summary>
+        /// Combines three results into a tuple.
+        /// </summary>
+        /// <typeparam name="T1">The type of the first result.</typeparam>
+        /// <typeparam name="T2">The type of the second result.</typeparam>
+        /// <typeparam name="T3">The type of the third result.</typeparam>
+        /// <param name="first">The first result.</param>
+        /// <param name="second">The second result.</param>
+        /// <param name="third">The third result.</param>
+        /// <returns>A result containing a tuple of all values, or the first failure.</returns>
+        public static Result<(T1, T2, T3)> Zip<T1, T2, T3>(
+            Result<T1> first,
+            Result<T2> second,
+            Result<T3> third)
+        {
+            if (first.IsFailure) return Result<(T1, T2, T3)>.Failure(first.Error);
+            if (second.IsFailure) return Result<(T1, T2, T3)>.Failure(second.Error);
+            if (third.IsFailure) return Result<(T1, T2, T3)>.Failure(third.Error);
+            return Result<(T1, T2, T3)>.Success((first.Value, second.Value, third.Value));
+        }
+
+        /// <summary>
+        /// Converts failure to success with a default value.
+        /// </summary>
+        /// <param name="defaultValue">The default value to use if this is a failure.</param>
+        /// <returns>This result if successful, or a new success result with the default value.</returns>
+        public Result<T> OrElse(T defaultValue)
+        {
+            return IsSuccess ? this : Success(defaultValue);
+        }
+
+        /// <summary>
+        /// Converts failure to success using a factory function.
+        /// </summary>
+        /// <param name="factory">The function to create a value from the error.</param>
+        /// <returns>This result if successful, or a new success result from the factory.</returns>
+        public Result<T> OrElse(Func<string, T> factory)
+        {
+            ArgumentNullException.ThrowIfNull(factory);
+            return IsSuccess ? this : Success(factory(_error!));
+        }
     }
 
     /// <summary>
@@ -496,7 +677,8 @@
     /// <summary>
     /// Represents the outcome of a void operation that can either succeed or fail with an error message.
     /// </summary>
-    public readonly struct Result
+    [System.Diagnostics.DebuggerDisplay("{IsSuccess ? \"Success\" : \"Failure(\" + _error + \")\"}}")]
+    public readonly struct Result : IEquatable<Result>
     {
         private readonly string? _error;
 
@@ -523,7 +705,7 @@
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if the result is a success.</exception>
         public string Error => IsFailure
-            ? _error!
+            ? _error ?? "Result was created using default constructor"
             : throw new InvalidOperationException("Cannot access Error on a successful result.");
 
         /// <summary>Creates a successful result.</summary>
@@ -587,6 +769,15 @@
             IsSuccess ? onSuccess() : onFailure(_error!);
 
         /// <summary>
+        /// Chains this result with an operation that returns another <see cref="Result"/>.
+        /// If this result is a failure, the binder is not executed and the failure propagates.
+        /// </summary>
+        /// <param name="binder">The function that returns a new Result.</param>
+        /// <returns>The result of the binder, or the original failure.</returns>
+        public Result Bind(Func<Result> binder) =>
+            IsSuccess ? binder() : this;
+
+        /// <summary>
         /// Chains this result with an operation that returns a <see cref="Result{T}"/>.
         /// If this result is a failure, the binder is not executed and the failure propagates.
         /// </summary>
@@ -595,6 +786,14 @@
         /// <returns>The result of the binder, or the original failure.</returns>
         public Result<T> Bind<T>(Func<Result<T>> binder) =>
             IsSuccess ? binder() : Result<T>.Failure(_error!);
+
+        /// <summary>
+        /// Asynchronously chains this result with an operation that returns another <see cref="Result"/>.
+        /// </summary>
+        /// <param name="binder">The async function that returns a new Result.</param>
+        /// <returns>The result of the binder, or the original failure.</returns>
+        public async Task<Result> BindAsync(Func<Task<Result>> binder) =>
+            IsSuccess ? await binder().ConfigureAwait(false) : this;
 
         /// <summary>
         /// Asynchronously executes a side-effect action on success without changing the result.
@@ -633,5 +832,51 @@
         /// <returns>A string in the form "Success" or "Failure(error)".</returns>
         public override string ToString() =>
             IsSuccess ? "Success" : $"Failure({_error})";
+
+        /// <summary>
+        /// Determines whether the specified <see cref="Result"/> is equal to the current <see cref="Result"/>.
+        /// </summary>
+        /// <param name="other">The result to compare with the current result.</param>
+        /// <returns>true if the specified result is equal to the current result; otherwise, false.</returns>
+        public bool Equals(Result other)
+        {
+            if (IsSuccess != other.IsSuccess)
+                return false;
+
+            return IsSuccess || _error == other._error;
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to the current <see cref="Result"/>.
+        /// </summary>
+        /// <param name="obj">The object to compare with the current result.</param>
+        /// <returns>true if the specified object is equal to the current result; otherwise, false.</returns>
+        public override bool Equals(object? obj) =>
+            obj is Result other && Equals(other);
+
+        /// <summary>
+        /// Returns the hash code for this <see cref="Result"/>.
+        /// </summary>
+        /// <returns>A hash code for the current result.</returns>
+        public override int GetHashCode() =>
+            IsSuccess ? HashCode.Combine(IsSuccess) : HashCode.Combine(IsSuccess, _error);
+
+        /// <summary>
+        /// Determines whether two <see cref="Result"/> instances are equal.
+        /// </summary>
+        /// <param name="left">The first result to compare.</param>
+        /// <param name="right">The second result to compare.</param>
+        /// <returns>true if the results are equal; otherwise, false.</returns>
+        public static bool operator ==(Result left, Result right) =>
+            left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two <see cref="Result"/> instances are not equal.
+        /// </summary>
+        /// <param name="left">The first result to compare.</param>
+        /// <param name="right">The second result to compare.</param>
+        /// <returns>true if the results are not equal; otherwise, false.</returns>
+        public static bool operator !=(Result left, Result right) =>
+            !left.Equals(right);
     }
 }

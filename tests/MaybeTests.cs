@@ -126,22 +126,22 @@ namespace Grondo.Tests
         public void Where_None_ReturnsNone() =>
             Maybe<int>.None.Where(x => x > 5).HasNoValue.Should().BeTrue();
 
-        // --- Execute ---
+        // --- Tap ---
 
         [TestMethod]
-        public void Execute_Some_RunsAction()
+        public void Tap_Some_RunsAction()
         {
             int captured = 0;
-            Maybe<int> result = Maybe<int>.Some(42).Execute(v => captured = v);
+            Maybe<int> result = Maybe<int>.Some(42).Tap(v => captured = v);
             captured.Should().Be(42);
             result.HasValue.Should().BeTrue();
         }
 
         [TestMethod]
-        public void Execute_None_DoesNotRunAction()
+        public void Tap_None_DoesNotRunAction()
         {
             int captured = 0;
-            Maybe<int>.None.Execute(v => captured = v);
+            Maybe<int>.None.Tap(v => captured = v);
             captured.Should().Be(0);
         }
 

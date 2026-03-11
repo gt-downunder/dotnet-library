@@ -675,3 +675,75 @@ string xml = item.Serialize();
 Product restored = xml.Deserialize<Product>();
 ```
 
+
+---
+
+## EnumerableExAsync
+
+Asynchronous extension methods for `IEnumerable<T>`. For synchronous extensions, see [EnumerableEx](#enumerableex).
+
+```csharp
+var userIds = new[] { 1, 2, 3, 4, 5 };
+
+// Sequential async projection
+var users = await userIds.SelectAsync(id => GetUserAsync(id));
+
+// Parallel async projection with concurrency limit
+var enrichedUsers = await users.SelectAsyncParallel(
+    user => EnrichUserDataAsync(user),
+    maxConcurrency: 10);
+
+// Async filtering
+var activeUsers = await users.WhereAsync(user => IsActiveAsync(user));
+
+// Async iteration
+await users.ForEachAsync(user => ProcessUserAsync(user));
+
+// Async aggregation
+var totalScore = await scores.AggregateAsync(
+    0,
+    async (sum, score) => sum + await CalculateAsync(score));
+
+// Async predicates
+bool hasAdmin = await users.AnyAsync(user => IsAdminAsync(user));
+bool allActive = await users.AllAsync(user => IsActiveAsync(user));
+```
+
+---
+
+## FuncEx
+
+Extensions for `Func<T>` and `Action` delegates providing memoization, debouncing, and throttling.
+
+```csharp
+// Memoization - cache expensive function results
+Func<int, int> fibonacci = null!;
+fibonacci = n => n <= 1 ? n : fibonacci(n - 1) + fibonacci(n - 2);
+var memoized = fibonacci.Memoize();
+
+var result1 = memoized(40); // Calculated
+var result2 = memoized(40); // Retrieved from cache (instant!)
+
+// Debounce - delay execution until calls stop
+Action search = () => PerformSearch();
+var debouncedSearch = search.Debounce(TimeSpan.FromMilliseconds(300));
+
+// In event handler (e.g., search-as-you-type)
+textBox.TextChanged += (s, e) => debouncedSearch();
+// Only executes after user stops typing for 300ms
+
+// Throttle - limit execution frequency
+Action updateMetrics = () => SendMetricsToServer();
+var throttled = updateMetrics.Throttle(TimeSpan.FromSeconds(5));
+
+// Called many times, but only executes once per 5 seconds
+for (int i = 0; i < 100; i++)
+    throttled();
+
+// Lazy initialization
+Func<ExpensiveResource> factory = () => new ExpensiveResource();
+Lazy<ExpensiveResource> lazy = factory.ToLazy();
+
+// Resource only created on first access
+var resource = lazy.Value;
+```

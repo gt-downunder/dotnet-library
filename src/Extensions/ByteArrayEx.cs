@@ -17,7 +17,17 @@ namespace Grondo.Extensions
             public string ToHexString()
             {
                 ArgumentNullException.ThrowIfNull(data);
-                return Convert.ToHexString(data).ToLowerInvariant();
+                if (data.Length == 0) return string.Empty;
+
+                return string.Create(data.Length * 2, data, static (span, bytes) =>
+                {
+                    ReadOnlySpan<char> hexChars = "0123456789abcdef";
+                    for (int i = 0; i < bytes.Length; i++)
+                    {
+                        span[i * 2] = hexChars[bytes[i] >> 4];
+                        span[i * 2 + 1] = hexChars[bytes[i] & 0xF];
+                    }
+                });
             }
 
             /// <summary>

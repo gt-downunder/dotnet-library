@@ -72,7 +72,7 @@ namespace Grondo.Extensions
                         _ => "th"
                     };
 
-                return $"{number}{suffix}";
+                return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}{1}", number, suffix);
             }
 
             /// <summary>Creates a <see cref="TimeSpan"/> representing the specified number of days.</summary>

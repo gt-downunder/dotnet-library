@@ -1,0 +1,227 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+---
+
+## [1.1.0] - 2026-03-11
+
+### Added
+
+#### New Types
+- **`Either<TLeft, TRight>`** - Dual-value type for representing success/failure with typed errors
+  - Methods: `FromLeft`, `FromRight`, `Match`, `Map`, `Bind`, `MapLeft`, `Tap`, `TapLeft`
+  - Async variants: `MapAsync`, `BindAsync`
+  - Implements `IEquatable<Either<L,R>>` with `==` and `!=` operators
+  - Includes `[DebuggerDisplay]` attribute for better debugging
+- **`Validation<T>`** - Accumulative validation type that collects all errors
+  - Methods: `Valid`, `Invalid`, `Combine`, `Map`, `Bind`, `Match`, `ToResult`
+  - Async variants: `MapAsync`, `BindAsync`
+  - Implements `IEquatable<Validation<T>>` with `==` and `!=` operators
+  - Includes `[DebuggerDisplay]` attribute
+
+#### LINQ Query Syntax Support
+- **`Result<T>`** now supports LINQ query syntax via `Select` and `SelectMany`
+- **`Maybe<T>`** now supports LINQ query syntax via `Select` and `SelectMany`
+- Enables readable functional composition with `from`/`select` syntax
+
+#### New Extension Classes
+- **`EnumerableExAsync`** - Asynchronous LINQ extensions
+  - `SelectAsync<TResult>` - Sequential async projection
+  - `SelectAsyncParallel<TResult>` - Parallel async projection with concurrency control
+  - `WhereAsync` - Async filtering
+  - `ForEachAsync` - Async iteration
+  - `AggregateAsync` - Async aggregation
+  - `AnyAsync` - Async any predicate
+  - `AllAsync` - Async all predicate
+- **`FuncEx`** - Function utilities
+  - `Memoize<T, TResult>()` - Cache function results (thread-safe)
+  - `Debounce(TimeSpan)` - Delay execution until calls stop
+  - `Throttle(TimeSpan)` - Limit execution frequency
+  - `ToLazy<T>()` - Convert function to lazy initializer
+
+#### Result<T> Enhancements
+- `Ok(T value)` - Alias for `Success` (common convention)
+- `Recover(Func<string, T>)` - Convert failure to success
+- `RecoverAsync(Func<string, Task<T>>)` - Async recovery
+- `Flatten(Result<Result<T>>)` - Flatten nested results
+- `Zip<T1, T2>(Result<T1>, Result<T2>)` - Combine two results into tuple
+- `Zip<T1, T2, T3>(...)` - Combine three results into tuple
+- `OrElse(T defaultValue)` - Provide default value on failure
+- `OrElse(Func<string, T>)` - Provide default via factory function
+
+#### Maybe<T> Enhancements
+- `OrElse(Maybe<T>)` - Provide alternative Maybe if None
+- `OrElse(Func<Maybe<T>>)` - Provide alternative via factory
+- `Filter(Func<T, bool>)` - Alias for `Where` (common in FP)
+- `Flatten(Maybe<Maybe<T>>)` - Flatten nested Maybes
+- `Zip<T1, T2>(Maybe<T1>, Maybe<T2>)` - Combine two Maybes into tuple
+- `OrValue(T defaultValue)` - Convert None to Some with default
+- `OrValue(Func<T>)` - Convert None to Some via factory
+
+#### GuardEx Enhancements
+- **String guards:**
+  - `ThrowIfNullOrEmpty(string? paramName)`
+  - `ThrowIfTooLong(int maxLength, string? paramName)`
+  - `ThrowIfTooShort(int minLength, string? paramName)`
+- **Collection guards:**
+  - `ThrowIfContains(T item, string? paramName)`
+  - `ThrowIfDoesNotContain(T item, string? paramName)`
+- **Enum guards:**
+  - `ThrowIfNotDefined(string? paramName)` for `TEnum where TEnum : struct, Enum`
+- **DateTime guards:**
+  - `ThrowIfInPast(string? paramName)`
+  - `ThrowIfInFuture(string? paramName)`
+  - `ThrowIfNotInRange(DateTime min, DateTime max, string? paramName)`
+- **Guid guards:**
+  - `ThrowIfEmpty(string? paramName)`
+
+#### ConfigurationEx Enhancements
+- `GetValue<T>(string key, T defaultValue)` - Get typed configuration value with default
+- `GetRequiredValue<T>(string key)` - Get required typed value (throws if missing)
+- `GetSection<T>(string sectionName)` - Bind configuration section to strongly-typed object
+
+#### EnvironmentEx Enhancements
+- `IsProduction()` - Check if environment is Production or Prod
+- `IsDevelopment()` - Check if environment is Development
+- `IsStaging()` - Check if environment is Staging
+- `IsEnvironment(params string[])` - Check if environment matches any specified names
+
+#### HttpEx Enhancements
+- `GetRawBodyAsBytesAsync(CancellationToken)` - Get raw body as bytes with buffering
+- `GetQueryParams()` - Get query parameters as read-only dictionary
+- `GetFormDataAsync(CancellationToken)` - Get form data as read-only dictionary
+- `IsAjaxRequest()` - Check if request is AJAX (X-Requested-With header)
+- `GetClientIpAddress()` - Get client IP address (checks X-Forwarded-For)
+
+#### New Exception Types
+- **`ValidationException`** (400 Bad Request)
+  - Includes `Errors` dictionary for field-level validation errors
+  - Supports single field or multiple field errors
+- **`TooManyRequestsException`** (429 Too Many Requests)
+  - Includes optional `RetryAfter` property
+  - For rate limiting scenarios
+- **`ServiceUnavailableException`** (503 Service Unavailable)
+  - Includes optional `RetryAfter` property
+  - For temporary service outages
+- **`UnprocessableEntityException`** (422 Unprocessable Entity)
+  - For semantically invalid requests
+
+#### StringFactory Enhancements
+- `CreateRandomString(int length, bool includeSpecialChars)` - Thread-safe random string generation
+- `CreateGuid()` - Helper method for GUID generation
+
+#### Debugging Improvements
+- Added `[DebuggerDisplay]` attributes to `Result<T>`, `Result`, `Maybe<T>`, `Either<L,R>`, `Validation<T>`
+- Shows meaningful information in debugger (e.g., "Success(42)" or "Failure(error)")
+
+### Fixed
+
+#### Critical Bug Fixes
+- **Thread-safety:** Fixed potential race condition in `StringFactory.CreateRandomString`
+  - Now uses `Random.Shared` instead of static `Random` instance
+  - Uses `string.Create` for zero-allocation string building
+- **Cultural invariance:** Fixed CA1305 violations in string formatting
+  - `NumericEx.ToOrdinal()` now uses `CultureInfo.InvariantCulture`
+  - `TimeSpanEx.Pluralize()` now uses `CultureInfo.InvariantCulture`
+  - `TimeSpanEx.ToRelativeString()` now uses `CultureInfo.InvariantCulture`
+
+### Changed
+
+#### Performance Optimizations
+- **`ByteArrayEx.ToHexString()`** - Optimized with `Span<char>` and `string.Create`
+  - Eliminates `ToLowerInvariant()` allocation
+  - ~2x faster for large byte arrays
+- **`EnumerableEx.Batch()`** - Optimized to reuse `List<T>` instead of allocating new ones
+  - Returns arrays instead of lists for better performance
+  - Reduces allocations in batching scenarios
+
+#### API Improvements
+- **`EnumerableEx`** - Updated XML documentation to reference `EnumerableExAsync`
+- **`EnumerableExAsync`** - Updated XML documentation to reference `EnumerableEx`
+- Cross-references between sync and async extension classes for better discoverability
+
+### Documentation
+
+#### Comprehensive Updates
+- Updated README.md with all new features and examples
+- Updated docs/index.md (GitHub Pages landing page)
+- Updated docs/types.md with Either<L,R>, Validation<T>, and LINQ syntax
+- Updated docs/extensions.md with EnumerableExAsync and FuncEx
+- Updated docs/exceptions.md with 4 new exception types
+- Added 20+ new code examples across all documentation
+- Added LINQ query syntax examples
+- Added real-world usage scenarios
+
+---
+
+## [1.0.0] - 2024-XX-XX (Previous Release)
+
+### Added
+- Initial release with core functionality
+- `Result<T>` and `Result` types for railway-oriented programming
+- `Maybe<T>` type for optional values
+- 27 extension method classes
+- 9 custom HTTP-mapped exception types
+- Utility classes: `JsonDefaults`, `StringFactory`, `Environments`
+- ASP.NET Core extensions: `ServiceProviderEx`, `EnvironmentEx`, `ConfigurationEx`, `HttpEx`
+
+---
+
+## Summary of Changes
+
+### Statistics
+- **New Types:** 2 (Either<L,R>, Validation<T>)
+- **New Extension Classes:** 2 (EnumerableExAsync, FuncEx)
+- **New Methods:** 60+
+- **New Exception Types:** 4
+- **Bug Fixes:** 2 critical (thread-safety, cultural invariance)
+- **Performance Improvements:** 2 (ByteArrayEx, EnumerableEx)
+- **Breaking Changes:** 0
+
+### Migration Guide
+
+#### From Previous Version
+
+No breaking changes! All existing code continues to work.
+
+**New features you can adopt:**
+
+```csharp
+// 1. LINQ query syntax (optional, but recommended)
+// Before:
+var result = GetUser(id)
+    .Bind(user => GetProfile(user.Id)
+        .Map(profile => new UserViewModel(user, profile)));
+
+// After:
+var result = from user in GetUser(id)
+             from profile in GetProfile(user.Id)
+             select new UserViewModel(user, profile);
+
+// 2. Accumulative validation (new capability)
+var validation = ValidateUser(request);
+if (validation.IsInvalid)
+{
+    // Returns ALL errors at once!
+    return BadRequest(validation.Errors);
+}
+
+// 3. Async LINQ (new capability)
+var users = await userIds.SelectAsync(id => GetUserAsync(id));
+
+// 4. Memoization (new capability)
+var memoized = expensiveFunction.Memoize();
+```
+
+---
+
+[Unreleased]: https://github.com/gt-downunder/dotnet-library/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/gt-downunder/dotnet-library/compare/v1.0.42...v1.1.0
+[1.0.0]: https://github.com/gt-downunder/dotnet-library/releases/tag/v1.0.0
+

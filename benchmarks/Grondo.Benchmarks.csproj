@@ -6,6 +6,8 @@
     <IsPackable>false</IsPackable>
     <!-- Benchmarks use underscored names for readability; suppress analyzer noise -->
     <NoWarn>CA1707;CA1822</NoWarn>
+    <!-- Disable XML documentation for benchmark project -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

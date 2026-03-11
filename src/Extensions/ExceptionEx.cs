@@ -75,11 +75,7 @@ namespace Grondo.Extensions
             {
                 ArgumentNullException.ThrowIfNull(exception);
 
-                return new ErrorResponse
-                {
-                    Message = exception.Message,
-                    MessageHeader = exception.MessageHeader
-                };
+                return new ErrorResponse(exception.Message, exception.MessageHeader);
             }
         }
     }

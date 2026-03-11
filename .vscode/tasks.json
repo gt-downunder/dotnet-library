@@ -1,6 +1,9 @@
 {
     "version": "2.0.0",
     "tasks": [
+        // ========================================
+        // BUILD TASKS
+        // ========================================
         {
             "label": "build",
             "command": "dotnet",
@@ -15,21 +18,28 @@
             "group": {
                 "kind": "build",
                 "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
             }
         },
         {
-            "label": "test",
+            "label": "build (Debug)",
             "command": "dotnet",
             "type": "process",
             "args": [
-                "test",
+                "build",
                 "${workspaceFolder}/Grondo.sln",
                 "-c",
-                "Release"
+                "Debug"
             ],
             "problemMatcher": "$msCompile",
-            "group": "test",
-            "dependsOn": "build"
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
         },
         {
             "label": "clean",
@@ -41,8 +51,104 @@
                 "-c",
                 "Release"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
         },
+        {
+            "label": "rebuild",
+            "dependsOn": ["clean", "build"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "restore",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "restore",
+                "${workspaceFolder}/Grondo.sln"
+            ],
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        // ========================================
+        // TEST TASKS
+        // ========================================
+        {
+            "label": "test",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "${workspaceFolder}/Grondo.sln",
+                "-c",
+                "Release",
+                "--no-build"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "dependsOn": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "test (verbose)",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "${workspaceFolder}/Grondo.sln",
+                "-c",
+                "Release",
+                "--no-build",
+                "--verbosity",
+                "normal"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "test",
+            "dependsOn": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "test (with coverage)",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "${workspaceFolder}/Grondo.sln",
+                "-c",
+                "Release",
+                "--no-build",
+                "--collect:XPlat Code Coverage"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": "test",
+            "dependsOn": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        // ========================================
+        // PACKAGE TASKS
+        // ========================================
         {
             "label": "pack",
             "command": "dotnet",
@@ -55,7 +161,132 @@
                 "Release"
             ],
             "problemMatcher": "$msCompile",
-            "dependsOn": "build"
+            "dependsOn": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "pack (with symbols)",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "pack",
+                "${workspaceFolder}/src/Grondo.csproj",
+                "--no-build",
+                "-c",
+                "Release",
+                "--include-symbols",
+                "--include-source"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOn": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        // ========================================
+        // BENCHMARK TASKS
+        // ========================================
+        {
+            "label": "run benchmarks",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/benchmarks/Grondo.Benchmarks.csproj",
+                "-c",
+                "Release"
+            ],
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        // ========================================
+        // UTILITY TASKS
+        // ========================================
+        {
+            "label": "format code",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "format",
+                "${workspaceFolder}/Grondo.sln"
+            ],
+            "problemMatcher": "$msCompile",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "check version",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "build",
+                "${workspaceFolder}/src/Grondo.csproj",
+                "-c",
+                "Release",
+                "|",
+                "grep",
+                "MinVer"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "list git tags",
+            "command": "git",
+            "type": "shell",
+            "args": [
+                "tag",
+                "-l",
+                "-n9"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        // ========================================
+        // COMPOSITE TASKS
+        // ========================================
+        {
+            "label": "build and test",
+            "dependsOn": ["build", "test"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "full rebuild and test",
+            "dependsOn": ["clean", "build", "test"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "prepare release",
+            "dependsOn": ["clean", "build", "test", "pack"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
         }
     ]
 }

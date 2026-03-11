@@ -60,6 +60,80 @@ namespace Grondo.Extensions
 
                 return !string.IsNullOrWhiteSpace(configuration[key]);
             }
+
+            /// <summary>
+            /// Gets a typed configuration value with a default.
+            /// </summary>
+            /// <typeparam name="T">The type to convert the value to.</typeparam>
+            /// <param name="key">The configuration key.</param>
+            /// <param name="defaultValue">The default value if the key is missing or conversion fails.</param>
+            /// <returns>The typed configuration value, or the default value.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the configuration is <c>null</c>.</exception>
+            public T GetValue<T>(string key, T defaultValue = default!)
+            {
+                ArgumentNullException.ThrowIfNull(configuration);
+                ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+                var value = configuration[key];
+                if (string.IsNullOrWhiteSpace(value))
+                    return defaultValue;
+
+                try
+                {
+                    return (T)Convert.ChangeType(value, typeof(T), System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch
+                {
+                    return defaultValue;
+                }
+            }
+
+            /// <summary>
+            /// Gets a required typed configuration value.
+            /// </summary>
+            /// <typeparam name="T">The type to convert the value to.</typeparam>
+            /// <param name="key">The configuration key.</param>
+            /// <returns>The typed configuration value.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the configuration is <c>null</c>.</exception>
+            /// <exception cref="InvalidOperationException">Thrown if the key is missing or conversion fails.</exception>
+            public T GetRequiredValue<T>(string key)
+            {
+                ArgumentNullException.ThrowIfNull(configuration);
+                ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+                var value = configuration[key];
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new InvalidOperationException($"Configuration key '{key}' is missing or empty.");
+
+                try
+                {
+                    return (T)Convert.ChangeType(value, typeof(T), System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot convert configuration key '{key}' to type {typeof(T).Name}",
+                        ex);
+                }
+            }
+
+            /// <summary>
+            /// Binds a configuration section to a strongly-typed object.
+            /// </summary>
+            /// <typeparam name="T">The type to bind to.</typeparam>
+            /// <param name="sectionName">The name of the configuration section.</param>
+            /// <returns>An instance of T with values bound from the configuration section.</returns>
+            /// <exception cref="ArgumentNullException">Thrown if the configuration is <c>null</c>.</exception>
+            public T GetSection<T>(string sectionName) where T : new()
+            {
+                ArgumentNullException.ThrowIfNull(configuration);
+                ArgumentException.ThrowIfNullOrWhiteSpace(sectionName);
+
+                var section = configuration.GetSection(sectionName);
+                var instance = new T();
+                section.Bind(instance);
+                return instance;
+            }
         }
     }
 }

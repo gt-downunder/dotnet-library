@@ -61,6 +61,89 @@ namespace Grondo.Extensions
                 await request.Body.CopyToAsync(stream, token).ConfigureAwait(false);
                 return stream.ToArray();
             }
+
+            /// <summary>
+            /// Retrieves a raw byte array from the <see cref="HttpRequest.Body"/> stream with buffering enabled.
+            /// </summary>
+            /// <param name="cancellationToken">An optional cancellation token.</param>
+            /// <returns>The raw body content as a byte array.</returns>
+            public async Task<byte[]> GetRawBodyAsBytesAsync(CancellationToken cancellationToken = default)
+            {
+                ArgumentNullException.ThrowIfNull(request);
+
+                request.EnableBuffering();
+                request.Body.Position = 0;
+
+                using var ms = new MemoryStream();
+                await request.Body.CopyToAsync(ms, cancellationToken).ConfigureAwait(false);
+                request.Body.Position = 0;
+
+                return ms.ToArray();
+            }
+
+            /// <summary>
+            /// Gets query parameters as a read-only dictionary.
+            /// </summary>
+            /// <returns>A dictionary of query parameters.</returns>
+            public IReadOnlyDictionary<string, string> GetQueryParams()
+            {
+                ArgumentNullException.ThrowIfNull(request);
+
+                return request.Query.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.ToString(),
+                    StringComparer.OrdinalIgnoreCase);
+            }
+
+            /// <summary>
+            /// Gets form data as a read-only dictionary.
+            /// </summary>
+            /// <param name="cancellationToken">An optional cancellation token.</param>
+            /// <returns>A dictionary of form data.</returns>
+            public async Task<IReadOnlyDictionary<string, string>> GetFormDataAsync(
+                CancellationToken cancellationToken = default)
+            {
+                ArgumentNullException.ThrowIfNull(request);
+
+                if (!request.HasFormContentType)
+                    return new Dictionary<string, string>();
+
+                var form = await request.ReadFormAsync(cancellationToken).ConfigureAwait(false);
+                return form.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.ToString(),
+                    StringComparer.OrdinalIgnoreCase);
+            }
+
+            /// <summary>
+            /// Determines whether the request is an AJAX request.
+            /// </summary>
+            /// <returns><c>true</c> if the request is an AJAX request; otherwise, <c>false</c>.</returns>
+            public bool IsAjaxRequest()
+            {
+                ArgumentNullException.ThrowIfNull(request);
+
+                return request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            }
+
+            /// <summary>
+            /// Gets the client IP address, checking X-Forwarded-For header first.
+            /// </summary>
+            /// <returns>The client IP address, or <c>null</c> if not available.</returns>
+            public string? GetClientIpAddress()
+            {
+                ArgumentNullException.ThrowIfNull(request);
+
+                // Check X-Forwarded-For header first (for proxies/load balancers)
+                var forwardedFor = request.Headers["X-Forwarded-For"].FirstOrDefault();
+                if (!string.IsNullOrEmpty(forwardedFor))
+                {
+                    var ips = forwardedFor.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    return ips[0].Trim();
+                }
+
+                return request.HttpContext.Connection.RemoteIpAddress?.ToString();
+            }
         }
     }
 }

@@ -5,6 +5,8 @@ on:
     push:
         branches:
             - main
+        tags:
+            - 'v*.*.*'  # Trigger on version tags (e.g., v1.1.0, v2.0.0)
 
 permissions:
   contents: read
@@ -17,19 +19,19 @@ env:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    outputs:
-      version: ${{ steps.set_version.outputs.VERSION }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v6
+      with:
+        fetch-depth: 0  # Required for MinVer to read Git history
 
-    - name: Generate dynamic version number
+    - name: Get version from MinVer
       id: set_version
       run: |
-          VERSION="1.0.${{ github.run_number }}"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          # MinVer will calculate version from Git tags
+          # No need to set VERSION manually - MinVer handles it
+          echo "MinVer will calculate version from Git tags"
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v5
@@ -41,6 +43,11 @@ jobs:
 
     - name: Build
       run: dotnet build Grondo.sln --no-restore -c Release
+
+    - name: Display calculated version
+      run: |
+        echo "### 📦 Package Version" >> $GITHUB_STEP_SUMMARY
+        dotnet build src/Grondo.csproj --no-restore -c Release 2>&1 | grep "MinVer:" >> $GITHUB_STEP_SUMMARY || echo "MinVer output not found" >> $GITHUB_STEP_SUMMARY
 
     - name: Run tests with coverage
       run: >-
@@ -62,17 +69,20 @@ jobs:
       run: cat ./coverage/report/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
 
     - name: Pack
-      run: dotnet pack src/Grondo.csproj --no-build -c Release -p:PackageVersion=${{ env.VERSION }} -o ./nupkgs/
+      run: dotnet pack src/Grondo.csproj --no-build -c Release -o ./nupkgs/
+      # MinVer automatically sets the package version from Git tags
 
     - name: Upload NuGet packages
       uses: actions/upload-artifact@v6
       with:
-        name: nupkgs-${{ env.VERSION }}
+        name: nupkgs
         path: ./nupkgs/
 
   publish:
     needs: build
     runs-on: ubuntu-24.04
+    # Only publish on main branch or when a version tag is pushed
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
 
     permissions:
       packages: write
@@ -81,7 +91,7 @@ jobs:
     - name: Download NuGet packages
       uses: actions/download-artifact@v7
       with:
-        name: nupkgs-${{ needs.build.outputs.VERSION }}
+        name: nupkgs
         path: ./nupkgs/
 
     - name: Setup .NET SDK

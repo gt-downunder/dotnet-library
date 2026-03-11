@@ -1,16 +1,42 @@
-<Project>
+﻿<Project>
 
     <PropertyGroup>
+        <!-- Target Framework -->
         <TargetFramework>net10.0</TargetFramework>
+        <LangVersion>14</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+
+        <!-- Package Metadata -->
         <Authors>gt-downunder</Authors>
 
-        <!-- Enforce code quality -->
+        <!-- Repository Information -->
+        <RepositoryUrl>https://github.com/gt-downunder/Grondo.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+        <!-- Deterministic Builds -->
+        <Deterministic>true</Deterministic>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+
+        <!-- Documentation -->
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+        <!-- Symbol Packages -->
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+        <!-- Code Quality -->
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <AnalysisLevel>latest-recommended</AnalysisLevel>
     </PropertyGroup>
+
+    <!-- Source Link: enables F12-into-source for all projects -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.*" PrivateAssets="All"/>
+    </ItemGroup>
 
 </Project>
 
