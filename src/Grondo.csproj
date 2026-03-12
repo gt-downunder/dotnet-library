@@ -33,7 +33,7 @@
     <!-- Source Link now in Directory.Build.props -->
     <!-- MinVer: Semantic versioning from Git tags -->
     <ItemGroup>
-        <PackageReference Include="MinVer" Version="6.*" PrivateAssets="All"/>
+        <PackageReference Include="MinVer" Version="7.*" PrivateAssets="All"/>
     </ItemGroup>
 
     <!-- Include README and LICENSE in the NuGet package -->
